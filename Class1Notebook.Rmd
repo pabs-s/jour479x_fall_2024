@@ -1,0 +1,14 @@
+---
+output:
+  html_notebook: default
+  html_document: default
+---
+
+# My awesome notebook
+
+This is my awesome notebook. It is **really** awesome. No, it's *really* awesome. I swear.
+```{r}
+2+2
+
+```
+
