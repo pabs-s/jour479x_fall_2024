@@ -11,7 +11,6 @@ library(tidyverse)
 
 We'll want to start with 2023 match data, which is located in [this GitHub repository](https://github.com/dwillis/NCAAWomensSoccerData). We can load the match data directly from GitHub using `read_csv`:
 
-
 ```{r}
 matches_2023 <- read_csv("https://raw.githubusercontent.com/dwillis/NCAAWomensSoccerData/main/data/ncaa_womens_soccer_matchstats_2023.csv")
 ```
@@ -19,33 +18,118 @@ matches_2023 <- read_csv("https://raw.githubusercontent.com/dwillis/NCAAWomensSo
 Let's take a look at this data to see what it contains, using `head` and `glimpse`:
 
 ```{r}
+
 head(matches_2023)
 glimpse(matches_2023)
+view(matches_2023)
+
 ```
 
 Now, onto the questions using aggregates, which means `group_by` and `summarize`:
 
 1. How many shots in total has Maryland attempted and how many have been on goal? Calculate a percentage of shots on goal.
 
+The Maryland Terrapins have attempted 180 total shots and 77 of those were on goal. A calculation of their percentage of shots on goal shows 42.77778%. 
+
 ```{r}
+
+matches_2023 |>
+  group_by(team) |>
+  summarize(
+    total_sh = sum(sh_att),
+    shots_ong = sum(so_g),
+    pct_sog = (shots_ong / total_sh) * 100) |>
+  filter(team == "Maryland Terrapins, Terps") |>
+  arrange(desc(total_sh))
 
 ```
 
 2. What about the same shot stats from last season's first four games? You'll need to load the matches from 2022 - just change the season in the URL - and filter by date to find the first four games.
 
+In the first four games of the 2022 season, the Maryland Terrapins had 48 shots, with 23 of those on goal. That calculates to 47.91667% of shots on goal over that stretch of games.
+
 ```{r}
+matches_2022 <- read_csv("https://raw.githubusercontent.com/dwillis/NCAAWomensSoccerData/main/data/ncaa_womens_soccer_matchstats_2022.csv")
+view(matches_2022)
+```
+
+```{r}
+
+matches_2022 |>
+  filter(
+    team == ("Maryland Terrapins, Terps"),  
+    date %in% c("2022-08-18", "2022-08-25", "2022-08-28", "2022-09-01")) |>
+  group_by(team) |>
+  summarize(
+    total_sh = sum(sh_att), 
+    shots_ong = sum(so_g),
+    pct_sog = (shots_ong / total_sh) * 100
+  ) |>
+  arrange(desc(total_sh))  
 
 ```
 
 
 3. What about draws - Maryland started 2022 with 4 ties. Have any other teams had as many this season?
 
+No other teams have started the 2024 season with four or more draws. However, six schools have three draws. 
+
 ```{r}
+
+matches_2024 <- read_csv("https://raw.githubusercontent.com/dwillis/NCAAWomensSoccerData/main/data/ncaa_womens_soccer_matchstats_2024.csv")
+view(matches_2024)
+
 ```
 
+```{r}
+
+draws_24 <- matches_2024 |>
+  filter(outcome == "Draw")
+  
+```
+
+```{r}
+
+draws_24 |>
+  group_by(team) |>
+  summarise(
+    tot_draws = n()) |>
+  #filter(tot_draws >= 4) |>
+  arrange(desc(tot_draws))
+
+```
 
 4. How many total corner kicks has Maryland had so far and how many have its opponents have? Calculate the difference between the two totals for every team.
 
+UMD has earned 18 corner kicks during its 2024 matches. The Navy Midshipmen have 31 corners, which is 13 more than UMD. Stony Brook has 23 corners, which is 5 more than UMD. James Madison University, American University and Lehigh University all have earned less than UMD so far this season. JMU has 15 corners, 3 less than UMD. American and Lehigh have earned 14 and 8 corners, respectively, for a difference of -4 and -10 corners compared to UMD.
+
 ```{r}
+
+matches_2024 |>
+ filter(
+    team == ("Maryland Terrapins, Terps")) |>
+      summarise(
+        terp_corners = sum(corners)
+      )
+
 ```
+
+```{r}
+
+matches_2024 |>
+  filter(team %in% c("Stony Brook Seawolves", "James Madison Dukes", "Lehigh Mountain Hawks", "American Eagles", "Navy Midshipmen")) |>
+  group_by(team) |>
+  summarize(
+    total_corners = sum(corners)
+  ) |>
+  mutate(corner_diff = total_corners - 18) |>
+  arrange(desc(total_corners))
+
+```
+
+
+
+
+
+
 
