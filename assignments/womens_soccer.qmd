@@ -101,7 +101,7 @@ draws_24 |>
 
 4. How many total corner kicks has Maryland had so far and how many have its opponents have? Calculate the difference between the two totals for every team.
 
-UMD has earned 18 corner kicks during its 2024 matches. The Navy Midshipmen have 31 corners, which is 13 more than UMD. Stony Brook has 23 corners, which is 5 more than UMD. James Madison University, American University and Lehigh University all have earned less than UMD so far this season. JMU has 15 corners, 3 less than UMD. American and Lehigh have earned 14 and 8 corners, respectively, for a difference of -4 and -10 corners compared to UMD.
+The Maryland Terrapins have earned 18 corner kicks so far in the 2024 season, its opponents have earned 23 corner kicks, indicating a difference of -5 corners in favor of the Terps' opponents. Among all schools in the 2024 matches data frame, the Virginia Tech Hokies have the highest positive difference in corners with 42. The McNeese Cowgirls have the largest negative difference, earning 41 less corners than opponents.
 
 ```{r}
 
@@ -109,24 +109,26 @@ matches_2024 |>
  filter(
     team == ("Maryland Terrapins, Terps")) |>
       summarise(
-        terp_corners = sum(corners)
+        terp_corners = sum(corners),
+        opp_corners = sum(defensive_corners),
+        diff_corners = sum(corners) - sum(defensive_corners)
       )
 
 ```
 
+
 ```{r}
 
 matches_2024 |>
-  filter(team %in% c("Stony Brook Seawolves", "James Madison Dukes", "Lehigh Mountain Hawks", "American Eagles", "Navy Midshipmen")) |>
   group_by(team) |>
-  summarize(
-    total_corners = sum(corners)
+  summarise(
+    tot_corners = sum(corners),
+    opp_corners = sum(defensive_corners),
+    diff_corners = sum(corners) - sum(defensive_corners)
   ) |>
-  mutate(corner_diff = total_corners - 18) |>
-  arrange(desc(total_corners))
+  arrange(desc(diff_corners))
 
 ```
-
 
 
 
