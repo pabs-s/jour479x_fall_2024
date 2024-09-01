@@ -101,7 +101,7 @@ draws_24 |>
 
 4. How many total corner kicks has Maryland had so far and how many have its opponents have? Calculate the difference between the two totals for every team.
 
-The Maryland Terrapins have earned 18 corner kicks so far in the 2024 season, its opponents have earned 23 corner kicks, indicating a difference of -5 corners in favor of the Terps' opponents. Among all schools in the 2024 matches data frame, the Virginia Tech Hokies have the highest positive difference in corners with 42. The McNeese Cowgirls have the largest negative difference, earning 41 less corners than opponents.
+The Maryland Terrapins have earned 18 corner kicks so far in the 2024 season, its opponents have earned 23 corner kicks, indicating a difference of -5 corners in favor of the Terps' opponents. Among all schools in the 2024 matches data frame, the Virginia Tech Hokies have the highest positive difference in corners with 42. The McNeese Cowgirls have the largest negative difference, earning 41 less corners than opponents. For the Hokies, the disparity could play a factor in their undefeated start to the season (4-0-1).
 
 ```{r}
 
