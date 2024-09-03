@@ -105,13 +105,13 @@ Previously we calculated totals for shots attempted and shots on goal for each t
 matches_2024 |> 
   group_by(team) |> 
   summarise(
-    total_on_goal = REPLACE WITH FORMULA,
-    total_goals = REPLACE WITH FORMULA
+    total_on_goal = sum(so_g),
+    total_goals = sum(goals)
   ) |> 
-  mutate(percent = REPLACE WITH FORMULA) |> 
+  mutate(percent = total_on_goal /total_goals) |> 
   arrange(desc(percent))
 ```
 
 What stands out to you here? Describe that below. Would you narrow down the results to certain teams based on the data? If so, do that in the code and explain why you did it below. Finally, what's the most interesting result to you that could be a story?
 
-**Answer** YOUR ANSWER HERE
+**Answer** The top answers list "Inf," but I'd keep those in because it stil reflects the disparity between teams. The most interesting result could be with the Wyoming Cowgirls with 25 to 1 corners.
