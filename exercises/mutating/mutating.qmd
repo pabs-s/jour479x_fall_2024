@@ -108,10 +108,13 @@ matches_2024 |>
     total_on_goal = sum(so_g),
     total_goals = sum(goals)
   ) |> 
-  mutate(percent = total_on_goal /total_goals) |> 
+  mutate(percent = (total_goals / total_on_goal) * 100) |> 
   arrange(desc(percent))
 ```
 
 What stands out to you here? Describe that below. Would you narrow down the results to certain teams based on the data? If so, do that in the code and explain why you did it below. Finally, what's the most interesting result to you that could be a story?
 
-**Answer** The top answers list "Inf," but I'd keep those in because it stil reflects the disparity between teams. The most interesting result could be with the Wyoming Cowgirls with 25 to 1 corners.
+**Answer** The top answer is the James Madison Dukes, who have converted over 58% of their shots on goal. I don't think I would narrow down the data unless I wanted to set a benchmark of X number of goals or if I wanted to campare teams within certain conferences/limit it to Power 4 schools. 
+
+One school that I'd like to look into is the Temple Owls to see why they might be struggling to convert a single shot on goal to start the season.
+Conversely, I'd like to know how the Arkansas Razorbacks are shooting at such a high volume while maintaining a nearly 39% conversion rate.
