@@ -33,7 +33,7 @@ The Maryland Terrapins have attempted 180 total shots and 77 of those were on go
 
 ```{r}
 
-matches_2023 |>
+matches_2024 |>
   group_by(team) |>
   summarize(
     total_sh = sum(sh_att),
@@ -129,6 +129,45 @@ matches_2024 |>
   arrange(desc(diff_corners))
 
 ```
+
+```{r}
+
+#corners_24 <- matches_2024 |> 
+ # mutate(corner_ratio = corners/defensive_corners)
+
+
+corners_24 |>
+  filter(corner_ratio >= 4.0)|>
+  group_by(outcome)|>
+  summarise(count = n())
+  
+
+```
+
+
+```{r}
+
+matches_2024 |>
+  group_by(team) |>
+  summarize(
+    total_sh = sum(sh_att),
+    shots_ong = sum(so_g),
+    pct_sog = (shots_ong / total_sh) * 100) |>
+  arrange(desc(pct_sog))
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
 
 
 
