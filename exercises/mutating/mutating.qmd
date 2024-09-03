@@ -9,9 +9,9 @@ Or new minus old divided by old. Your new number minus the old number, the resul
 So first we'll import the tidyverse so we can read in our data and begin to work with it. Go ahead and do that:
 
 ```{r}
-#| warning: false
-#| message: false
-# load the tidyverse here
+
+library(tidyverse)
+
 ```
 
 Now you'll need a common and simple dataset of total attendance at NCAA football games over the last few seasons.
@@ -51,14 +51,16 @@ head(attendance)
 
 What's one thing you notice about the data that might make year-over-year comparisons more complex?
 
-**Answer** DESCRIBE IT HERE
+**Answer** One thing that complicates the data is that a number of FBS/mid-major schools have not reported attendance figures over several years. This would make comparisons difficult as we're missing a part of this picture.
 
 The code to calculate percent change is pretty simple. Remember, with `summarize`, we used `n()` to count things. With `mutate`, we use very similar syntax to calculate a new value using other values in our dataset. So in this case, we're trying to do (new-old)/old, but we're doing it with fields. If we look at what we got when we did `head`, you'll see there's \`2023\` as the new data, and we'll use \`2022\` as the old data. So we're looking at one year. Then, to help us, we'll use arrange again to sort it, so we get the fastest growing school over one year.
 
 ```{r}
-attendance |> mutate(
-  change = (`2023` - `2022`)/`2022`
-) 
+
+attendance |> 
+  mutate(change = (`2023` - `2022`)/`2022`) 
+
+
 ```
 
 What do we see right away? Do those numbers look like we expect them to? No. They're a decimal expressed as a percentage. So let's fix that by multiplying by 100.
@@ -72,14 +74,20 @@ attendance |> mutate(
 Now, does this ordering do anything for us? No. Let's fix that with arrange.
 
 ```{r}
+
 attendance |> mutate(
   change = ((`2023` - `2022`)/`2022`)*100
 ) |> arrange(desc(change))
+
 ```
 
 Who had the most growth in 2023 compared to the year before? What could account for that change? And what team(s) are the most interesting here?
 
-**Answer** YOUR ANSWER HERE
+**Answer** Houston observed the largest growth between 2022 and 2023. There are a number of factors that might have contributed to the growth. The simplest potential explanation is that the University of Houston either built a new stadium or renovated its current stadium to expand its capacity. Another explanation is that the team's potential positive performances enticed fans to attend more games.
+
+Some interesting points in this data: Teams that switched or joined conferences are listed twice to include attendance figures from each of their conference stints. I'm also intrigued by Hawaii because it's so isolated from the rest of its conference opponents and the rest of the U.S. that I would not have anticipated a major jump in attendance.
+
+
 
 ## Back to women's soccer
 
@@ -95,7 +103,7 @@ Previously we calculated totals for shots attempted and shots on goal for each t
 
 ```{r}
 matches_2024 |> 
-  group_by(REPLACE WITH GROUP_BY) |> 
+  group_by(team) |> 
   summarise(
     total_on_goal = REPLACE WITH FORMULA,
     total_goals = REPLACE WITH FORMULA
