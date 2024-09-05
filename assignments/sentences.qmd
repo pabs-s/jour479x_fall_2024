@@ -1,0 +1,71 @@
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+matches_2023 <- read_csv("https://raw.githubusercontent.com/dwillis/NCAAWomensSoccerData/main/data/ncaa_womens_soccer_matchstats_2023.csv")
+
+```
+```{r}
+
+matches_2023 |> 
+  group_by(team) |> 
+  summarise(
+    total_on_goal = sum(so_g),
+    total_goals = sum(goals)
+  ) |> 
+  mutate(percent = (total_goals / total_on_goal) * 100) |> 
+  arrange(desc(percent))
+
+```
+
+
+```{r}
+
+matches_2023 |> 
+  group_by(team) |> 
+  summarise(
+    total_on_goal = sum(so_g),
+    total_goals = sum(goals)
+  ) |> 
+  mutate(percent = (total_goals / total_on_goal) * 100) |> 
+  filter(total_on_goal >= 100) |>
+  arrange(desc(percent))
+
+```
+
+```{r}
+
+matches_2023 |> 
+  group_by(team) |> 
+  summarise(
+    total_on_goal = sum(so_g),
+    total_goals = sum(goals)
+  ) |> 
+  mutate(percent = (total_goals / total_on_goal) * 100) |> 
+  filter(total_on_goal >= 150) |>
+  arrange(desc(percent))
+
+```
+
+
+```{r}
+
+matches_2023 |> 
+  group_by(team) |> 
+  summarise(
+    total_on_goal = sum(so_g),
+    total_goals = sum(goals)
+  ) |> 
+  mutate(percent = (total_goals / total_on_goal) * 100) |> 
+  filter(total_on_goal >= 200) |>
+  arrange(desc(total_on_goal))
+
+```
+
+
+If the "Shooters shoot" mentality is something that you appreciate as a women's college soccer fan, here are two exciting teams to get behind -- the BYU Cougars and Saint Louis Billikens. During the 2023 season, the Cougars led the country with 231 shots on goal and converted 75 of them, marking a nearly 32.5% conversion rate and ranking 17th in the country by that metric. Similarly, the Billikens accounted for 222 shots on goal, 74 of which found the back of the net over the same period. That 33% conversion rate places them at 13th in the same ranking. Only three other schools eclipsed the 200 mark of shots on goal during the 2023 season, those being the Pittsburgh Panthers, Clemson Tigers and Nebraska Huskers. Of those, only the Huskers reached a 30% conversion rate.
+
+
+
