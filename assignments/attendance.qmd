@@ -11,14 +11,22 @@ And read in the attendance data:
 ```{r}
 attendance <- read_csv("https://dwillis.github.io/sports-data-files/attendance.csv")
 ```
+```{r}
+view(attendance)
+```
+
 
 Using the tidyverse's `pivot_longer` function, turn the currently wide data into longer data and save it as a new dataframe called `attendance_longer`:
 
 ```{r}
 attendance_longer <- attendance |> pivot_longer(cols = starts_with("20"), names_to = "Year", values_to = "Attendance")
 
-attendance_longer |> filter(Attendance >= 500000)
-
+attendance_longer |>
+  filter(Attendance >= 500000) |>
+  group_by(Institution) |>
+  summarise(years = n()) |>
+  filter(years < 5)
+  
 ```
 
 Let's try to figure out whether football attendance has returned to "normal" by 2023, defining "normal" as 2019 figures. For that we'll need to isolate those two years using `filter()` and get rid of any NAs:
@@ -42,3 +50,30 @@ attendance_wide <- attendance_wide |> mutate(percent = (`2023`-`2019`)/`2019`*10
 Some of these clearly are influenced by performance on the field. Below, describe the most interesting results (positive or negative) and what you think might be going on with them. Feel free to do some googling and describe what other data would be helpful to clarify what the best stories here might be. What surprises you about these results?
 
 **ANSWER**
+The top three jumpers -- Houston, Tulane and Rutgers -- are teams that have seen success on the field over that span (winning record, bowl games, etc.). In the case of Houston, it transferred to the Big 12 and, in doing so, reignited in-state rivalries with TCU, Baylor and Texas Tech. Those types of games are sure to garner fan attention and renew interest in attending games. 
+
+Appalachian State is also an interesting school on this list as it lost its head coach, Eli Drinkwitz, to Missouri after the 2018 season. It still had a 25% improvement in spite of that.
+
+
+```{r}
+
+big_ten_with_wins <- read_csv("https://dwillis.github.io/sports-data-files/big_ten_no_2020.csv")
+view(big_ten_with_wins)
+
+```
+```{r}
+
+b10_avg <- big_ten_with_wins |>
+  group_by(Institution) |>
+  summarise(
+    avg_att = mean(Attendance),
+    avg_wins = (Wins),
+    sd_att = sd(Attendance),
+    sd_wins = sd(Wins)
+  )
+  
+
+```
+
+One of the most interesting teams on this list is the Nebraska Cornhuskers. Outside of the historically "elite" programs, Nebraska is an example of a school that can consistently bring fans into the stadium despite having recent losing records. Its standard deviation for attendance is the closest to the mean for the Big 10. However, its standard deviation for wins is among one of the further Big 10 schools.
+
