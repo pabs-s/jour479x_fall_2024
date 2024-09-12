@@ -13,6 +13,7 @@ We'll want to start with 2023 match data, which is located in [this GitHub repos
 
 ```{r}
 matches_2023 <- read_csv("https://raw.githubusercontent.com/dwillis/NCAAWomensSoccerData/main/data/ncaa_womens_soccer_matchstats_2023.csv")
+matches_2024 <- read_csv("https://raw.githubusercontent.com/dwillis/NCAAWomensSoccerData/main/data/ncaa_womens_soccer_matchstats_2024.csv")
 ```
 
 Let's take a look at this data to see what it contains, using `head` and `glimpse`:
@@ -159,11 +160,66 @@ matches_2024 |>
 ```
 
 
+Create a significance test on total scoring (goals + defensive_goals) for all NCAA teams using the 2023 and 2024 data. Load the 2023 and 2024 matches data above. For both, we'll need to add a column called `total_goals` and populate it using `mutate()`.
+
+Our Null Hypothesis is that there is no significant difference in the average number of goals scored in 2023 and 2024. Our Alternative Hypothesis is there is a significant difference in the average number of goals scored in 2023 and 2024.
+
+Based on the output (read from the bottom), is scoring up this year, and is that result significant? Explain your answers in the notebook
+
+What about scoring in Maryland games? Do the same t-test and answer the same questions.
+
+```{r}
+ 
+goals_23 <- matches_2023 |>
+  mutate(total_goals = goals + defensive_goals)
+
+goals_24 <- matches_2024 |>
+  mutate(total_goals = goals + defensive_goals)
+
+```
 
 
+Our Null Hypothesis is that there is no significant difference in the average number of goals scored in 2023 and 2024. Our Alternative Hypothesis is there is a significant difference in the average number of goals scored in 2023 and 2024.
 
 
+```{r}
 
+g_result <- t.test(goals_23$total_goals, goals_24$total_goals, alternative="two.sided", var.equal = TRUE)
+print(g_result)
+
+```
+Based on the output (read from the bottom), is scoring up this year, and is that result significant?
+
+Based on the output, the samples are incredibly similar but there is a marginal increase in scoring this year. However, the incredibly small p-value suggests that there is a stastical significance in the scoring increase between the seasons. Therefore, we'd reject the null hypothesis in this case.
+
+What about scoring in Maryland games? Do the same t-test and answer the same questions.
+
+```{r}
+
+umd_goals23 <- goals_23 |> filter(team == 'Maryland Terrapins, Terps') 
+umd_goals24 <- goals_24 |> filter(team == 'Maryland Terrapins, Terps')
+
+umd_g_result <- t.test(umd_goals23$total_goals, umd_goals24$total_goals, alternative ="two.sided", var.equal = TRUE)
+
+print(umd_g_result)
+
+```
+
+Because the p-value is larger than our 0.05 significance level, we can conclude that there is no statistically significant difference between the average number of goals scored by UMD between the 2023 season and the beginning of the 2024 season. In essence, it's probably too early to tell.
+
+
+```{r}
+
+umd_goals23 <- goals_23 |> filter(team == 'Maryland Terrapins, Terps') |> filter(date < '2023-09-12')
+umd_goals24 <- goals_24 |> filter(team == 'Maryland Terrapins, Terps') 
+
+umd_g_result <- t.test(umd_goals23$total_goals, umd_goals24$total_goals, alternative ="two.sided", var.equal = TRUE)
+
+print(umd_g_result)
+
+```
+
+After adjusting the UMD test to filter and target early season games, we see a larger disparity in scoring between the seasons. However, our t-test is still larger than 0.05, so the data does not provide strong enough evidence to conclude that there is a significant difference in scoring.
 
 
 
