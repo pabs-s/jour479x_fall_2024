@@ -2,6 +2,72 @@
 library(tidyverse)
 ```
 
+```{r}
+matches23 <- read_csv("https://raw.githubusercontent.com/dwillis/NCAAWomensVolleyballData/main/data/ncaa_womens_volleyball_matchstats_2023.csv")
+
+matches24 <- read_csv("https://raw.githubusercontent.com/dwillis/NCAAWomensVolleyballData/main/data/ncaa_womens_volleyball_matchstats_2024.csv")
+
+```
+
+Get Maryland's Aces
+
+```{r}
+
+matches23 |>
+  filter(team == 'Maryland Terrapins, Terps') |>
+  group_by(result) |>
+  summarise(
+    avg_aces = mean(aces)
+  )
+
+```
+
+
+```{r}
+
+matches24 |>
+  filter(team == 'Maryland Terrapins, Terps') |>
+  group_by(result) |>
+  summarise(
+    avg_aces = mean(aces)
+  )
+
+```
+
+Is the 24 dataset statistically significant?
+
+T-test for significance
+Null hypothesis: There's no difference between the two years.
+
+```{r}
+
+umd_aces23 <- matches23 |> filter(team == 'Maryland Terrapins, Terps') |> mutate(season=2023) #|> filter(date < '2023-09-12')
+umd_aces24 <- matches24 |> filter(team == 'Maryland Terrapins, Terps') |> mutate(season=2024)
+  
+result <- t.test(umd_aces23$aces, umd_aces24$aces, alternative="two.sided", var.equal = TRUE)
+
+print(result)
+
+```
+
+ANOVA: Analysis of Variance
+
+Bind rows only works when you have identical structures among the data sets.
+
+```{r}
+
+combined <- bind_rows(umd_aces23, umd_aces24)
+
+combined$result <- factor(combined$result)
+combined$season <- factor(combined$season)
+
+anova_result <- aov(aces ~ result * season, data=combined)
+
+summary(anova_result)
+
+```
+
+
 Here's an example of how to calculate z-scores using NCAA volleyball teams. We'll use match data for the 2023 season.
 
 ```{r}

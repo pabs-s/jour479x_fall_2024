@@ -1,0 +1,54 @@
+---
+title: "NBA Bubble"
+author: "Pablo Suarez"
+date: "2024-09-12"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+logs <- read_csv("/Users/psuarez/Documents/GitHub/jour479x_fall_2024/data/nbabubble.csv")
+```
+
+```{r}
+points <- logs |> mutate(totalpoints = TeamScore + OpponentScore )
+view(points)
+```
+
+
+```{r}
+t.test(totalpoints ~ COVID, data=points)
+```
+
+Remember, if the probability is below .05, then we determine that this number is statistically significant. We’ll talk more about statistical significance soon, but in this case, statistical significance means that our hypothesis is correct: points are different without fans than with. And since our hypothesis is correct, we reject the null hypothesis and we can confidently say that bubble teams are scoring more than they were when fans packed arenas.
+
+
+Accepting the Null Hypothesis: Homecourt is no longer an advantage, and the home team will score less relative to the away team. 
+
+First things first: We need to make a dataframe where Team is the home team. And then we’ll create a differential between the home team and away team. If home court is an advantage, the differential should average out to be positive – the home team scores more than the away team.
+
+```{r}
+homecourt <- logs |> filter(is.na(HomeAway) == TRUE) |> mutate(differential = TeamScore - OpponentScore)
+```
+
+```{r}
+t.test(differential ~ COVID, data=homecourt)
+```
+
+So again, start at the bottom. With Fans, the home team averages 2.17 more points than the away team. Without fans, they average 1.64 more.
+
+If you are a bad sportswriter or a hack sports talk radio host, you look at this and scream “the bubble killed home court!”
+
+But two things: first, the home team is STILL, on average, scoring more than the away team on the whole.
+
+And two: Look at the p-value. It’s .7129. Is that less than .05? No, no it is not. So that means we have to accept the null hypothesis that there is no difference between fans and no fans when it comes to the difference between the home team and the away team’s score. Now, does this mean that the bubble hasn’t impacted the magic of home court? Not necessarily. What it’s saying is that the variance between one and the other is too large to be able to say that they’re different. It could just be random noise that’s causing the difference, and so it’s not real. More to the point, it’s saying that this metric isn’t capable of telling you that there’s no home court in the bubble.
+
+
+
