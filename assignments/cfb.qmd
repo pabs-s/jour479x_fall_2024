@@ -1,6 +1,8 @@
 ```{r}
+
 library(tidyverse)
 library(cfbfastR)
+
 ```
 
 
@@ -13,3 +15,5 @@ First-play problems: it appears that teams are inconsistent about how they defin
 ```{r}
 plays_2023 |> filter(drive_number == 1, play_number == 1, play_type != 'Kickoff') |> distinct(home, play_type)
 ```
+
+

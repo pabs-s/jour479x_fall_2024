@@ -190,7 +190,7 @@ print(g_result)
 ```
 Based on the output (read from the bottom), is scoring up this year, and is that result significant?
 
-Based on the output, the samples are incredibly similar but there is a marginal increase in scoring this year. However, the incredibly small p-value suggests that there is a stastical significance in the scoring increase between the seasons. Therefore, we'd reject the null hypothesis in this case.
+Based on the output, the samples are incredibly similar but there is a marginal increase in scoring this year. However, the incredibly small p-value suggests that there is a statistical significance in the scoring increase between the seasons. Therefore, we'd reject the null hypothesis in this case.
 
 What about scoring in Maryland games? Do the same t-test and answer the same questions.
 
@@ -220,6 +220,105 @@ print(umd_g_result)
 ```
 
 After adjusting the UMD test to filter and target early season games, we see a larger disparity in scoring between the seasons. However, our t-test is still larger than 0.05, so the data does not provide strong enough evidence to conclude that there is a significant difference in scoring.
+
+
+### Correlations
+
+
+```{r}
+
+correlations <- read_csv("https://raw.githubusercontent.com/dwillis/NCAAWomensSoccerData/main/data/ncaa_womens_soccer_matchstats_2024.csv")
+
+```
+
+```{r}
+
+newcorrelations <- correlations |> 
+  mutate(
+    differential = goals - defensive_goals
+    )
+
+```
+
+```{r}
+
+newcorrelations |> summarise(correlation = cor(differential, fouls, method="pearson"))
+
+```
+
+Correlation function takes two factors (in our case, differential and fouls) and specifying we want a pearson correlation. The number we get back is the correlation coefficient. So on a scale of -1 to 1, where 0 means there’s no relationship at all and 1 or -1 means a perfect relationship, fouls and whether or not the team scores more goals than it gives up are at 0.02326518. You could say they’re about 2 percent related toward the positive – more fouls, the higher your differential. Another way to say it? They’re almost 98 percent not related.
+
+What about the number of yellow cards instead of fouls? Do more aggressive defensive teams also score more?
+
+```{r}
+
+newcorrelations |> summarise(correlation = cor(differential, yellow_cards, method="pearson"))
+
+```
+```{r}
+
+fit <- lm(differential ~ fouls, data = newcorrelations)
+summary(fit) #summary function represents the result
+
+```
+The p-value here is meaningful in the sense that this could happen based on random chance. 
+
+How much of goal differential can be explained by fouls? The answer is basically not at all.
+
+In this case, we could try to predict a team’s score differential in a game – will they score more than they give up – by using y=mx+b. In this case, y is the aggregate score, m is 0.009306 and b is 0.008153. So we would multiply a teams total fouls by 0.009306 and then add 0.008153. to it. The result would tell you what the total aggregate score in the game would be, according to our model. Chance that you’re even close with this? Almost none. Did I say we should quit? Yeah.
+
+
+_Correlations Assignment_
+
+Write a few sentences describing how you might pitch a story about the UMD soccer team's performance this year that uses the model that you built but doesn't mention the statistical output. In other words, craft a pitch that describes the essence of the model's results, using specific matches, without resorting to p-values and r-squared values.
+---
+
+Nearly halfway through their season and three wins under their belt, the UMD women's soccer team is still sorting out its on-pitch identity to bolster its position in the win column. One place they can start is by following an age-old proverb: Sharing is caring. 
+
+Now, let's make something clear. This is a team that struggled to score goals during the 2023 season -- nine goals across 18 games, all of which came in the first half of the season. So far, the Terps have exceeded that figure with 13 goals. While that increase in performance hasn't necessarily translated to greater success in the standings, there is an uptick in the passing game that has potentially helped the team's finishing ability. The Terps finished the 2023 season with just four assists. Through nine games this year, they have 11 assists (with five coming in their Sept. 8 win against VCU). It's not enough to say more efficient passing and greater assists will inevitably lead this team to success, but it offers a potential point of emphasis for this team moving forward. 
+
+
+```{r}
+
+newcorrelations |> summarise(correlation = cor(goals, assists, method="pearson"))
+
+```
+
+```{r}
+
+filtered_data <- newcorrelations |>
+  filter(newcorrelations[["team"]] == 'Maryland Terrapins, Terps')
+fit2 <- lm(goals ~ assists, data = filtered_data)
+summary(fit2)
+
+```
+
+
+
+
+Extra codeblocks for testing variables:
+
+```{r}
+
+newcorrelations |> summarise(correlation = cor(opponent_score, defensive_corners, method="pearson"))
+
+```
+
+```{r}
+
+filtered_data <- newcorrelations |>
+  filter(newcorrelations[["team"]] == 'Maryland Terrapins, Terps')
+fit2 <- lm(opponent_score ~ defensive_corners, data = filtered_data)
+summary(fit2)
+
+```
+
+
+
+
+
+
+
 
 
 
