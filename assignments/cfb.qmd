@@ -8,6 +8,7 @@ library(cfbfastR)
 
 ```{r}
 plays_2023 <- cfbd_pbp_data(2023)
+view(plays_2023)
 ```
 
 First-play problems: it appears that teams are inconsistent about how they define the first play. Many use the kickoff as the first play, while some do not.
@@ -16,4 +17,125 @@ First-play problems: it appears that teams are inconsistent about how they defin
 plays_2023 |> filter(drive_number == 1, play_number == 1, play_type != 'Kickoff') |> distinct(home, play_type)
 ```
 
+-----
+
+### College Football Regression Analysis Homework Assignment
+
+_Step 1: Load college football game data into a variable called 'logs' and examine it._
+
+```{r}
+logs <- read_csv("https://dwillis.github.io/sports-data-files/footballlogs1123.csv")
+view(logs)
+```
+
+_Step 2: Create a new column for point differential between the TeamScore and OpponentScore using mutate._
+
+```{r}
+
+logs <- logs |> 
+  mutate(
+  Differential = TeamScore - OpponentScore)
+
+```
+
+_Step 3: Create a regression investigating whether the number of penalties can predict the score differential. Describe the results: What is the p-value, and does it mean the results are random? Using the r-squared value, how much of the differential can be explained by penalty yards? How useful is this regression?_
+
+```{r}
+
+pen_score <- lm(Differential ~ Penalties, data=logs)
+summary(pen_score)
+
+```
+Answer to Step 3: 
+Our p-value following the regression is 0.005767, which is less than 0.05 and tells us that this finding---whether penalties can help predict score differential---is statistically significant. While significant, this relationship is probably not due to random chance and have little impact on point differential. However, there are a few other factors we should note. The residual standard error is 22.6%, which signifies that there is a healthy amount of error within these results. We'd ideally like to get that number down much closer to zero. Also, the adjusted r-squared value is 0.0003204. This tells us that only 0.03204% of the variation in the differential is influenced by penalty yards. To recap, penalties can effect point differential and have a statistically significant relationship, but they are not a strong predictor for differential in the slightest.
+
+
+_Step 4: Create a multiple regression model. Instead of using the number of penalties alone, combine other numeric columns that describe mistakes/bad outcomes to try and predict the score differential with a higher degree of confidence. Look at the same values in the results you did before, but also take into account the residual standard error and the risk of multicollinearity - are you adding columns that explain each other instead of the differential? Describe the results below._
+
+
+Taking a first stab at selecting various factors: 
+
+```{r}
+
+cfblogs <- logs |> 
+  select(where(is.numeric)) |> 
+  select(Differential, TotalTurnovers, PenaltyYds, DefPenalties, DefPenaltyYds, DefPassingCmp, DefRushingAvg, DefFirstDownTotal)
+
+```
+
+```{r}
+cormatrix <- rcorr(as.matrix(cfblogs))
+
+cormatrix$r
+```
+
+Take out one of DefPenalties and DefPenaltyYds because they show multicollinearity. We should probably do the same for DefPassingCmp and DefFirstDownTotal as they show moderate overlap with each other. DefRushingAvg, DefFirstDownTotal and TotalTurnovers have the strongest relationship with differential among the selected columns.
+
+Second stab at this:
+
+```{r}
+
+cfblogs2 <- logs |> 
+  select(where(is.numeric)) |> 
+  select(Differential, Penalties, TotalTurnovers, PenaltyYds, DefPenaltyYds, DefRushingYds, DefFirstDownTotal, DefPassingYds)
+
+```
+
+```{r}
+
+cormatrix <- rcorr(as.matrix(cfblogs2))
+
+cormatrix$r
+
+```
+
+```{r}
+
+model <- lm(Differential ~ Penalties, TotalTurnovers + PenaltyYds + DefRushingYds + DefFirstDownTotal + DefPassingYds, data=cfblogs2)
+summary(model)
+
+```
+
+Step 4 Answer: After adding a number of factors to our regression, we see a few significant developments. Our p-value, although it previously was already statistically significant, is even smaller, while our standard error has not changed much. The adjusted R-squared value suggests that 1.4% of the variance in differential can be explained by the factors we've included. At the same time, we're not seeing major multicollinearity issues here. 
+
+
+_Step 5: Use filter to narrow the game data so that you're only working with games that are close. Are your simple or multiple regression models better or worse? Explain your choices._
+
+```{r}
+
+cfblogs3 <- logs |> 
+  select(where(is.numeric)) |> 
+  filter(Differential <= 10 & Differential >= -10) |> 
+  select(Differential, Penalties, TotalTurnovers, PenaltyYds, DefPenaltyYds, DefRushingYds, DefFirstDownTotal, DefPassingYds)
+
+```
+
+Simple Regression:
+```{r}
+
+cfb3score <- lm(Differential ~ Penalties, data=logs)
+summary(cfb3score)
+
+```
+
+Multiple Regression:
+```{r}
+
+model3 <- lm(Differential ~ Penalties + TotalTurnovers + PenaltyYds + DefRushingYds + DefFirstDownTotal + DefPassingYds, data=cfblogs3)
+summary(model3)
+
+```
+
+```{r}
+
+model3 <- lm(Differential ~ Penalties + TotalTurnovers + PenaltyYds + DefRushingYds + DefPassingYds, data=cfblogs3)
+summary(model3)
+
+```
+
+
+Step 5 Answer: 
+The NFL technically defines "close games" as game differentials of seven points or less. We opted to use ten points as the benchmark in order to include a broader set of games that could still be classified as "winnable" in late game scenarios. After filtering our logs dataset, we then ran a simple and multiple regression. The results of the simple regression are pretty similar to our original analysis. However, there was plenty of change with the multiple regression. Our p-value is still statistically significant and the standard error was significantly brought down to 5.6%, signifying a high-degree of accuracy. The adjusted R-squared value at 0.12 is the most concerning element here. This suggests that only 11% of our differential can be explained by variance in these included factors. In terms of how much stock to put in this model, we'd lean towards not a lot. It's accurate, but not very predictive. 
+
+Overall, there is a negative relationship between penalties and point differential given that as a team's number of penalties increases, the differential worsens. However, it's not the strongest predictor for games, many other factors need to be included and even then, it's still not great. Is that necessarily surprising and newsworthy? Not really. It's probably better to do an analysis like this already knowing which teams are culprits for garnering a lot of penalties and then assessing the impact of their penalties. 
 
