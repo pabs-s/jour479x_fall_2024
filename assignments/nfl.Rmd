@@ -66,3 +66,16 @@ We observed more variance in down usage for McLaurin to start the 2023 season an
 
 Now in the 2024 season, it looks like the Commanders are beginning to establish some chemistry between Jayden Daniels and McLaurin, especially after week 3. They've been feeding him primarily short passes and screens up until last night when they set him loose down the sidelines. They're also, more notably, looking to get the ball in McLaurin's hands earlier in their set of downs compared to previous seasons. 
 
+
+Slack Code:
+```{r}
+pbp_24 |> 
+  filter(!is.na(receiver)) |> # removes NA records
+  filter(week < 4, play_type == 'pass', game_half == 'Half1') |>
+  group_by(receiver, posteam) |> 
+  summarize(targets = n()) |> 
+  arrange(desc(targets))
+
+```
+
+
