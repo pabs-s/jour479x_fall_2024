@@ -1,0 +1,68 @@
+```{r}
+library(tidyverse)
+library(nflfastR)
+```
+
+### Terry McLaurin targets by half
+
+* load the play-by-play data
+
+```{r}
+
+pbp_22 <- read_rds("https://github.com/nflverse/nflverse-data/releases/download/pbp/play_by_play_2022.rds")
+pbp_23 <- read_rds("https://github.com/nflverse/nflverse-data/releases/download/pbp/play_by_play_2023.rds")
+pbp_24 <- read_rds("https://github.com/nflverse/nflverse-data/releases/download/pbp/play_by_play_2024.rds")
+
+```
+
+first half plays, washington possession, pass play, mclaurin target, first three games of 2022
+
+```{r}
+
+#mclaurin22 <- 
+pbp_22 |>
+  filter(
+    game_half == "Half1",
+    posteam == "WAS",
+    play_type == "pass",
+    receiver == "T.McLaurin",
+    game_date <= "2022-09-25"
+  )
+
+```
+
+```{r}
+
+#mclaurin23 <- 
+pbp_23 |>
+  filter(
+    game_half == "Half1",
+    posteam == "WAS",
+    play_type == "pass",
+    receiver == "T.McLaurin",
+    week < 4
+  )
+
+```
+
+
+```{r}
+
+#mclaurin24 <- 
+pbp_24 |>
+  filter(
+    game_half == "Half1",
+    posteam == "WAS",
+    play_type == "pass",
+    receiver == "T.McLaurin",
+    week < 4
+  )
+
+```
+
+Through the first three games of 2022, the Commanders utilized Terry McLaurin as primarily a deep ball threat that they hoped to connect with often in second and third down situations. However, it appears that quarterback Carson Wentz was often off-target on these throws. We'd have to refer back to the tape to see coverages and determine "fault" on why those passes were incompletions.
+
+We observed more variance in down usage for McLaurin to start the 2023 season and the team seemed to look for him in screen passes and short gains near the sidelines, rather than taking deep shots. There were far more completions compared to 2022, with the yardage for completions typically hovering between 5-10 yards.
+
+Now in the 2024 season, it looks like the Commanders are beginning to establish some chemistry between Jayden Daniels and McLaurin, especially after week 3. They've been feeding him primarily short passes and screens up until last night when they set him loose down the sidelines. They're also, more notably, looking to get the ball in McLaurin's hands earlier in their set of downs compared to previous seasons. 
+
