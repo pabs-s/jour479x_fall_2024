@@ -1,0 +1,16 @@
+###Volleyball Z-Scores Analysis
+
+_Step 1: Load in the Tidyverse and our 2024 match data._
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+matches24 <- read_csv("https://raw.githubusercontent.com/dwillis/NCAAWomensVolleyballData/main/data/ncaa_womens_volleyball_matchstats_2024.csv")
+```
+
+_Step 2: Set up a code block to create team averages and z-scores (but change the metrics used in the tutorial)._
+
+
+

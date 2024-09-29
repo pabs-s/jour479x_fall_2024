@@ -76,3 +76,61 @@ logs |>
      ) |> summarise(avg_score = mean(TeamScore), avg_opp = mean(OpponentScore))
 ```
 
+
+------------------
+
+# Residuals
+
+Read in the Tidyverse
+
+```{r}
+cbb_logs <- read_csv("https://dwillis.github.io/sports-data-files/cbblogs1524.csv")
+```
+
+```{r}
+
+residualmodel <- cbb_logs |> mutate(differential = TeamScore - OpponentScore, FGPctMargin = TeamFGPCT - OpponentFGPCT)
+
+fit <- lm(differential ~ FGPctMargin, data = residualmodel)
+summary(fit)
+
+```
+
+```{r}
+
+residualmodel <- residualmodel |> 
+  filter(!is.na(FGPctMargin))
+
+residualmodel <- residualmodel |> mutate(predicted = predict(fit), residuals = residuals(fit))
+
+```
+
+```{r}
+
+residualmodel <- residualmodel |> 
+  filter(!is.na(FGPctMargin))
+
+residualmodel |> filter(Conference == 'Big Ten') |> arrange(desc(residuals)) |> select(Date, Team, Opponent, W_L, differential, FGPctMargin, predicted, residuals)
+
+```
+
+```{r}
+fouls <- cbb_logs |> 
+  mutate(
+    differential = TeamScore - OpponentScore, 
+    TotalFouls = TeamPersonalFouls+OpponentPersonalFouls
+  )
+
+pfit <- lm(differential ~ TotalFouls, data = fouls)
+summary(pfit)
+```
+
+```{r}
+
+fouls <- fouls |> filter(!is.na(TotalFouls))
+fouls$predicted <- predict(pfit)
+fouls$residuals <- residuals(pfit)
+
+```
+
+
