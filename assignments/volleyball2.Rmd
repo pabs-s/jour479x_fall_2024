@@ -4,6 +4,7 @@ _Step 1: Load in the Tidyverse and our 2024 match data._
 
 ```{r}
 library(tidyverse)
+library(dplyr)
 ```
 
 ```{r}
@@ -11,6 +12,102 @@ matches24 <- read_csv("https://raw.githubusercontent.com/dwillis/NCAAWomensVolle
 ```
 
 _Step 2: Set up a code block to create team averages and z-scores (but change the metrics used in the tutorial)._
+
+We'll first need to add up our totals for the stats we're using in this analysis.
+
+
+```{r}
+team_total_stats <- 
+  matches24 |>
+  group_by(team) |>
+  summarise(
+    sets = sum(s),
+    tot_kills = sum(kills),
+    tot_digs = sum(digs),
+    tot_aces = sum(aces),
+    avg_hit_pct = mean(hit_pct),
+    tot_errors = sum(errors),
+  ) |>
+  select(team, sets, tot_kills, tot_digs, tot_aces, avg_hit_pct, tot_errors) 
+
+```
+
+Then, to find our averages, we need to divide our totals by the number of sets played throughout the season.
+
+```{r}
+
+vbstatspset <- 
+  team_total_stats |>
+ mutate(
+    killsperset = tot_kills/sets,
+    digsperset = tot_digs/sets,
+    acesperset = tot_aces/sets,
+    errorsperset = tot_errors/sets) |>
+  select(team, killsperset, digsperset, acesperset, avg_hit_pct, errorsperset) 
+
+```
+
+
+Finally, we can calculate z-scores for our various stats.
+
+```{r}
+
+vbstatspset <- vbstatspset |>
+   mutate(
+   killsz = as.numeric(scale(killsperset, center = TRUE, scale = TRUE)),
+   acesz = as.numeric(scale(acesperset, center = TRUE, scale = TRUE)),
+   digsz = as.numeric(scale(digsperset, center = TRUE, scale = TRUE)),
+   hitpctz = as.numeric(scale(avg_hit_pct, center = TRUE, scale = TRUE)),
+   errorsz = as.numeric(scale(errorsperset, center = TRUE, scale = TRUE)),
+  total_vbz = as.numeric(killsz + acesz + digsz + hitpctz + errorsz)
+ )
+
+head(vbstatspset)
+```
+
+Now we can take a look at our schools and see who our top performers are. 
+
+```{r}
+
+vbstatspset |>
+  arrange(desc(total_vbz))
+
+```
+
+After creating a composite z-score, it appears that the school with the highest score is...Valparaiso with a z-score of 6.5518? Followed by Tennessee Tech, N.C. A&T, Georgia State, Wright State, Boise State, Saint Francis, Western Michigan, Bryant and Hofstra. 
+
+
+So then where does Maryland fall on this list? Let's make a rank column to find out. 
+
+```{r}
+
+vbstatspset |>
+arrange(desc(total_vbz)) |>  
+  mutate(rank = row_number()) |>
+  filter(team == "Maryland")
+  
+```
+
+So we see that in our data set of 234 schools (available for analysis based on stats tracked), the Terps are ranked 196 in terms of composite z-score. However, a z-score of 0.6879 doesn't necessarily mean they're a "bad" team, but just that they're very average. Let's also take a look at the company the school keeps in the rankings.
+
+```{r}
+
+vbstatspset |>
+arrange(desc(total_vbz)) |>  
+  mutate(rank = row_number()) |>
+  filter(rank >= 190 & rank <= 200)
+
+```
+
+Schools that are similarly ranked include Gonzaga, High Point, Tennessee State, Penn State, Houston, UC Riverside, Illinois State, SFA and Southern University.
+
+Story ideas? 
+
+My big question here is what is a 9-5 team from the Missouri Valley Conference (Valparaiso) doing so successfully to be this high on the list? Same with a lot of these mid-major schools in the top 10.
+
+What are the keys to Georgia Southern, with a z-score of over 2.6 for digs, being elite at generating digs?
+
+What can we find out about the Pittsburgh Panthers outperforming top schools in hitting percentage? And why is that team struggling in terms of digs? If they shored that issue up, what's their ceiling?
 
 
 
