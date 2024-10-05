@@ -1,0 +1,30 @@
+### First Presentation - Data Backgrounding
+
+Question: Which NBA media outlets best provide accurate post-draft grades for lottery picks (1-14)? Can we grade the graders?
+
+This is a question that I pitched for the class project, but I'm doing it on a smaller scale for this individual project. Grades would be collected from publicly available published articles from outlets like ESPN, CBS Sports, The Ringer, Bleacher Report and Yahoo! Sports. Draft pick orders can be located from several different sources, and player stats can be pulled from Basketball Reference. Since draft grades are listed in an A-F format, we'd have to create a formula for a 4.0 GPA scale that we can then use to evaluate players' stats since their draft and determine whether they deserve the grade they were originally awarded by an outlet. 
+
+_1. Does that data already exist? Can you get it?_
+The data exists. However, it will take some cleaning and merging efforts to combine everything into one data set. Draft orders and picks are publicly available, and I can pull that data for each draft from Basketball Reference (https://www.basketball-reference.com/draft/_). Draft grades are also publicly available online. For example, here are links from various publications for their 2024 NBA Draft grades (ESPN: https://archive.ph/4NtTs, CBS: https://www.cbssports.com/nba/news/2024-nba-draft-grades-complete-pick-by-pick-analysis-for-rounds-1-and-2-from-zaccharie-risacher-to-bronny-james/, The Ringer: https://nbadraft.theringer.com/draft-grades, Bleacher Report: https://bleacherreport.com/articles/10126327-grading-every-nba-teams-2024-nba-draft-performance-including-trades, Yahoo Sports: https://sports.yahoo.com/2024-nba-draft-grades-for-all-30-teams-with-high-marks-for-lakers-and-knicks-012056013.html)
+
+The Ringer will be an exception as it was launched in 2016. Many of its former employees were part of a publication called Grantland, and some also transferred to ESPN after a merger between the two companies, but I could not find draft grades dating back to those days, so I'll have to add a disclaimer to their results.
+
+_2. Do you need assistance in getting it?_
+As shown above, I don't think I'll need assistance getting this data. Most of the work here is putting it all together into one cohesive data set.
+
+_3. What time frame do you want/need data from?_
+I'm going to start with drafts dating back to 2011 (that was the earliest available year for ESPN) all the way to 2023 because there is no NBA data for those players yet. I may have to find a workaround for extending this analysis prior to 2011. 
+
+_4. Will you have to improve or augment the data in order to answer your question? If so, how?_
+My initial plan is to use win shares by player as a metric for measuring an individual's impact after being drafted (that's a stat that is provided on BBref). I'll have to establish a weighted/grading system for that metric, by which to grade players to determine if the initial draft grade matches their current grade. I'll also have to take each year's picks and merge them into one data set. My plan for the data set is that each player will serve as its own row. Columns will be as follows: Draft year, pick number, draft team, current team, publication grade upon being drafted, average publication grade, win share and my grade based on win share. 
+
+_5. Are there other examples of this kind of work (specific or general)? If so, provide them._
+After doing some searching, I'm having trouble finding whether others have taken it upon themselves to do this type of project. However, searching for it is difficult because most of the results include standard draft grade articles, as opposed to comparisons.
+
+_6. Create code blocks to load the appropriate libraries and then read in the data_
+
+
+
+
+
+
