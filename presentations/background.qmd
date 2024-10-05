@@ -23,6 +23,19 @@ After doing some searching, I'm having trouble finding whether others have taken
 
 _6. Create code blocks to load the appropriate libraries and then read in the data_
 
+Below, I've loaded the draft data that I'll be using for my analysis. The grade data will involve using ChatGPT to take the grades from the URL and turn them into a CSV format that I can merge to the larger combined data set. 
+
+```{r}
+
+library(readr)
+library(tidyverse)
+
+```
+```{r}
+
+
+
+```
 
 
 
