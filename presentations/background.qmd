@@ -23,7 +23,7 @@ After doing some searching, I'm having trouble finding whether others have taken
 
 _6. Create code blocks to load the appropriate libraries and then read in the data_
 
-Below, I've loaded the draft data that I'll be using for my analysis. The grade data will involve using ChatGPT to take the grades from the URL and turn them into a CSV format that I can merge to the larger combined data set. 
+Below, I've loaded the draft data that I'll be using for my analysis. The grade data will involve using ChatGPT to take the grades from the URL and turn them into a CSV format that I can merge to the larger combined data set. Once I merge the different draft years into one data set, I'll add the grade data I've collected in the next phase of the project, and then I'll mutate a column for average grade and another for draft year. 
 
 ```{r}
 
