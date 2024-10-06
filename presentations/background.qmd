@@ -31,12 +31,33 @@ library(readr)
 library(tidyverse)
 
 ```
+
+My data wasn't loading properly using the format that we normaly use. Therefore, I had to ask ChatGPT to help me reset the working directory. I'm not sure if that will impact other projects I have in this repository, but it did help me load everything in. 
+
 ```{r}
 
-
+setwd("/Users/psuarez/Documents/GitHub/jour479x_fall_2024/data/")
+rookie11 <- read.csv("rookie11.csv")
+rookie12 <- read.csv("rookie12.csv")
+rookie13 <- read.csv("rookie13.csv")
+rookie14 <- read.csv("rookie14.csv")
+rookie15 <- read.csv("rookie15.csv")
+rookie16 <- read.csv("rookie16.csv")
+rookie17 <- read.csv("rookie17.csv")
+rookie18 <- read.csv("rookie18.csv")
+rookie19 <- read.csv("rookie19.csv")
+rookie20 <- read.csv("rookie20.csv")
+rookie21 <- read.csv("rookie21.csv")
+rookie22 <- read.csv("rookie22.csv")
+rookie23 <- read.csv("rookie23.csv")
 
 ```
 
+```{r}
+
+view(rookie15)
+
+```
 
 
 
