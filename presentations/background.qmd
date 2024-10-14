@@ -30,6 +30,8 @@ Below, I've loaded the draft data that I'll be using for my analysis. The grade 
 library(readr)
 library(tidyverse)
 library(purrr)
+library(scales)
+library(ggplot2)
 
 ```
 
@@ -65,10 +67,6 @@ view(rookie15)
 Given the feedback I gave you in ELMS, take the next step in your presentation analysis and explore the data more. Continue in your background.rmd notebook and add a section in which you write code that describes your data: how many rows, the range of time it covers, etc. If you are using game-level data, use a group_by statement that shows the potential values in a key column you'll need to answer your question and how many times each value occurs.
 
 If you have categorical data (for example, a single column in which the values can be put into groups), make a bar chart of it.
-
-If you have continuous data (for example, tracking a stat over time for one or more teams/players), make a line chart of it.
-
-If you haven't yet loaded your data, load at least one of the datasets necessary to do this.
 
 Describe any weaknesses or challenges that these steps have surfaced for you - do they make your question harder to answer?
 
@@ -152,7 +150,65 @@ nba_draft <- bind_cols(nba_draft, draft_grades)
 ```
 
 
+With the data frame set up. I can shift my focus to answering the questions for this milestone.
+_1. Add a section in which you write code that describes your data: how many rows, the range of time it covers, etc._
 
+```{r}
+num_rows <- nrow(nba_draft)
+num_cols <- ncol(nba_draft)
+cat("Number of Rows:", num_rows, "\n")
+cat("Number of Columns:", num_cols, "\n")
+
+min_year <- min(nba_draft$yr, na.rm = TRUE)
+max_year <- max(nba_draft$yr, na.rm = TRUE)
+cat("Data covers the years from", min_year, "to", max_year, "\n")
+
+colnames(nba_draft)
+```
+
+_2. If you have categorical data (for example, a single column in which the values can be put into groups), make a bar chart of it._
+
+I used ChatGPT to help me accomplish this task. I then altered some of the code to remove NA values. Here is the link to my query: https://chatgpt.com/share/670c7a20-1924-8010-8f68-12ad2fae3bdb
+
+```{r}
+
+grade_count <- draft_grades |>
+  pivot_longer(cols = everything(), names_to = "source", values_to = "grade") |>
+  drop_na() |> 
+  group_by(grade) |>
+  summarise(count = n(), .groups = "drop")
+
+print(grade_count)
+
+```
+
+This is not my final analysis. However, here is a preliminary bar chart that counts the number of times a specific grade appears throughout this data set. It's still helpful in showing the grade distribution from the media in totality. Further analysis includes a stacked bar chart showing grades by outlet. 
+
+Eventually, I'll work on my initial goal of linking individual win share by player with a GPA to get a better sense of their "actual" grade. 
+
+```{r}
+ggplot() + 
+  geom_bar(
+    data=grade_count, 
+    aes(x=reorder(grade, -count),
+        weight=count)) + 
+  scale_y_continuous(labels=comma) + 
+  labs(
+    title="The Media Tends to Highly Grade NBA Lottery Picks", 
+    x="Letter Grades", 
+    y="Count") + 
+  theme_minimal()
+```
+
+_3. Describe any weaknesses or challenges that these steps have surfaced for you - do they make your question harder to answer?_
+
+There were a few issues I encountered during this milestone. Unfortunately, some of these pages (like ESPN) were collected using an archiving system, so ChatGPT could not process them. Other sites, like Bleacher Report and CBS, blocked ChatGPT access. The solution for this was to manually input grades from those websites.
+
+Another issue I encountered in collecting data is that many are overall team draft grades, which see the writers consider later picks to form the grade. However, some accurate grades are still mixed into those articles because some grades only include first-round picks, and many teams only had their lottery pick in the first round. Regardless, this poses a significant challenge for analyzing individual grades.
+
+Also, ESPN does not have grades starting from 2018 and onward. Therefore, it might be more useful for me to search for other outlets that have consistently put out grades on a yearly basis.
+
+One challenge, which I believe I'll encounter in later milestones, is figuring out how to scale a GPA value to metrics like win share. That will require looking at the range of values in the data frame. 
 
 
 
