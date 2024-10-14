@@ -29,6 +29,7 @@ Below, I've loaded the draft data that I'll be using for my analysis. The grade 
 
 library(readr)
 library(tidyverse)
+library(purrr)
 
 ```
 
@@ -58,6 +59,102 @@ rookie23 <- read.csv("rookie23.csv")
 view(rookie15)
 
 ```
+
+### First Presentation -- Exploration
+
+Given the feedback I gave you in ELMS, take the next step in your presentation analysis and explore the data more. Continue in your background.rmd notebook and add a section in which you write code that describes your data: how many rows, the range of time it covers, etc. If you are using game-level data, use a group_by statement that shows the potential values in a key column you'll need to answer your question and how many times each value occurs.
+
+If you have categorical data (for example, a single column in which the values can be put into groups), make a bar chart of it.
+
+If you have continuous data (for example, tracking a stat over time for one or more teams/players), make a line chart of it.
+
+If you haven't yet loaded your data, load at least one of the datasets necessary to do this.
+
+Describe any weaknesses or challenges that these steps have surfaced for you - do they make your question harder to answer?
+
+----
+
+For this first step, I'm going to join the 13 data frames I called in. First, I need to add a year column to make it easier to distinguish the year a player was drafted.
+
+```{r}
+rookie11 <- rookie11 |>
+  mutate(yr = 2011) |>
+  select(yr, everything())
+
+rookie12 <- rookie12 |>
+  mutate(yr = 2012) |>
+  select(yr, everything())
+
+rookie13 <- rookie13 |>
+  mutate(yr = 2013) |>
+  select(yr, everything())
+
+rookie14 <- rookie14 |>
+  mutate(yr = 2014) |>
+  select(yr, everything())
+
+rookie15 <- rookie15 |>
+  mutate(yr = 2015) |>
+  select(yr, everything())
+
+rookie16 <- rookie16 |>
+  mutate(yr = 2016) |>
+  select(yr, everything())
+
+rookie17 <- rookie17 |>
+  mutate(yr = 2017) |>
+  select(yr, everything())
+
+rookie18 <- rookie18 |>
+  mutate(yr = 2018) |>
+  select(yr, everything())
+
+rookie19 <- rookie19 |>
+  mutate(yr = 2019) |>
+  select(yr, everything())
+
+rookie20 <- rookie20 |>
+  mutate(yr = 2020) |>
+  select(yr, everything())
+
+rookie21 <- rookie21 |>
+  mutate(yr = 2021) |>
+  select(yr, everything())
+
+rookie22 <- rookie22 |>
+  mutate(yr = 2022) |>
+  select(yr, everything())
+
+rookie23 <- rookie23 |>
+  mutate(yr = 2023) |>
+  select(yr, everything())
+
+```
+
+Then, because each of the data frames have the same column names, I'm just going to use the bind_rows function to join them.
+
+```{r}
+
+nba_draft <- bind_rows(rookie11, rookie12, rookie13, rookie14, rookie15, rookie16, rookie17, rookie18, rookie19, rookie20, rookie21, rookie22, rookie23)
+
+```
+
+Next, I'm calling in the draft grades data I compiled over the last week, and then I'll join it to the nba_draft data frame.
+
+```{r}
+#setwd("/Users/psuarez/Documents/GitHub/jour479x_fall_2024/data/")
+draft_grades <- read_csv("draft_grades.csv")
+view(draft_grades)
+```
+
+```{r}
+nba_draft <- bind_cols(nba_draft, draft_grades)
+```
+
+
+
+
+
 
 
 
