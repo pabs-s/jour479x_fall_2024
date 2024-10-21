@@ -40,19 +40,19 @@ My data wasn't loading properly using the format that we normaly use. Therefore,
 ```{r}
 
 setwd("/Users/psuarez/Documents/GitHub/jour479x_fall_2024/data/")
-rookie11 <- read.csv("rookie11.csv")
-rookie12 <- read.csv("rookie12.csv")
-rookie13 <- read.csv("rookie13.csv")
-rookie14 <- read.csv("rookie14.csv")
-rookie15 <- read.csv("rookie15.csv")
-rookie16 <- read.csv("rookie16.csv")
-rookie17 <- read.csv("rookie17.csv")
-rookie18 <- read.csv("rookie18.csv")
-rookie19 <- read.csv("rookie19.csv")
-rookie20 <- read.csv("rookie20.csv")
-rookie21 <- read.csv("rookie21.csv")
-rookie22 <- read.csv("rookie22.csv")
-rookie23 <- read.csv("rookie23.csv")
+rookie11 <- read_csv("rookie11.csv")
+rookie12 <- read_csv("rookie12.csv")
+rookie13 <- read_csv("rookie13.csv")
+rookie14 <- read_csv("rookie14.csv")
+rookie15 <- read_csv("rookie15.csv")
+rookie16 <- read_csv("rookie16.csv")
+rookie17 <- read_csv("rookie17.csv")
+rookie18 <- read_csv("rookie18.csv")
+rookie19 <- read_csv("rookie19.csv")
+rookie20 <- read_csv("rookie20.csv")
+rookie21 <- read_csv("rookie21.csv")
+rookie22 <- read_csv("rookie22.csv")
+rookie23 <- read_csv("rookie23.csv")
 
 ```
 
@@ -140,7 +140,7 @@ nba_draft <- bind_rows(rookie11, rookie12, rookie13, rookie14, rookie15, rookie1
 Next, I'm calling in the draft grades data I compiled over the last week, and then I'll join it to the nba_draft data frame.
 
 ```{r}
-#setwd("/Users/psuarez/Documents/GitHub/jour479x_fall_2024/data/")
+setwd("/Users/psuarez/Documents/GitHub/jour479x_fall_2024/data/")
 draft_grades <- read_csv("draft_grades.csv")
 view(draft_grades)
 ```
@@ -210,6 +210,195 @@ Also, ESPN does not have grades starting from 2018 and onward. Therefore, it mig
 
 One challenge, which I believe I'll encounter in later milestones, is figuring out how to scale a GPA value to metrics like win share. That will require looking at the range of values in the data frame. 
 
+-------
+
+### Refining
+
+Assignment Instructions:
+Given the feedback I gave you in ELMS, take the next step in your presentation analysis and explore the data more. Continue in your background.rmd notebook and add a section in which you write code that extends and refines your analysis. You should have all of the data you need by now. If you do not have the data you need, talk to me.
+
+This step is focused on getting a clear answer to your main question and developing secondary questions or theories that help test the validity of the original question (basically, what are the limits of this question - how much can/does the answer explain?). You should be getting results from writing code and then trying to visualize them in an appropriate manner. If you're not sure what kind of visualization works best, talk to me.
+
+I want you to produce a fair bit of code this week - try things, experiment with the results, tweak your code to ask variations of the questions you have. If you're looking at your work and still have some obvious questions, you should try to answer them.
+
+Analysis:
+My first step is to turn my draft grades compiled from different publications and convert them to a 4.0 GPA scale. 
+The code below transforms the grades to their corresponding values on the scale. 
+
+```{r}
+
+nba_draft_gpa <- nba_draft |>
+  mutate(across(c(espn_gr, cbs_gr, br_gr, yahoo_gr, ringer_gr), 
+  ~ case_when(
+    . == "A"  ~ 4.0,
+    . == "A-" ~ 3.7,
+    . == "B+" ~ 3.3,
+    . == "B"  ~ 3.0,
+    . == "B-" ~ 2.7,
+    . == "C+" ~ 2.3,
+    . == "C"  ~ 2.0,
+    . == "C-" ~ 1.7,
+    . == "D+" ~ 1.3,
+    . == "D"  ~ 1.0,
+    . == "D-" ~ 0.7,
+    TRUE ~ NA_real_)))
+
+```
+
+This next step adds a column called avg_grade which finds the mean of all publication grades a player received.
+```{r}
+
+nba_draft_gpa <- nba_draft_gpa |>
+  mutate(avg_grade = rowMeans(cbind(espn_gr, cbs_gr, br_gr, yahoo_gr, ringer_gr), na.rm = TRUE))
+
+glimpse(nba_draft_gpa)
+
+```
+
+Right off the bat, I want to see the lowest graded players by average. I'm adding a few different performance metrics that I want to test as well: VORP (Value Over Replacement Player), BPM (Box Score Plus/Minus) and Win Shares. VORP measures a player's contribution compared to a replacement-level player, while BPM estimates a player’s net impact on the team per 100 possessions, accounting for both offensive and defensive contributions. Win share accounts for a player's impact translated to wins for their team across their career. In the case of all of these stats, higher numbers are indicators of a good player. 
+
+Maryland's own Jalen Smith, drafted in 2020, received the lowest average marks from media pundits. However, he's still slightly better than replacement level players. The first player that stands out to me is Cameron Johnson, who has nearly double Jalen Smith's win share in with one less year played and is positive across the metrics examined.
+
+```{r}
+
+nba_draft_gpa |>
+  filter(!is.na(avg_grade)) |>             
+  arrange(avg_grade) |>
+  select(yr, Pk, Player, avg_grade, VORP, BPM, WS)
+
+```
+
+Conversely, I found players with the highest average draft grades. A few things to keep in mind with more recently drafted players: They haven't had as much of an opportunity to generate high win share due to lack of experience or being on rebuilding teams. 
+```{r}
+
+nba_draft_gpa |>
+  filter(!is.na(avg_grade) & !is.na(WS)) |> 
+  arrange(desc(avg_grade), WS) |>            
+  select(yr, Pk, Player, avg_grade, VORP, BPM, WS)          
+  head(20)  
+
+```
+
+Getting further into the analysis, I want to begin identifying the correlation between the collected draft grades and a player's win share.
+
+So none of these are incredibly impressive. Yahoo, right off the bat, shows the strongest positive correlation, suggesting that its grades tend to only somewhat align with how successful players are in win shares. The Ringer has a modest positive correlation, while ESPN and CBS have weak positive correlations. Bleacher Report scored the lowest, suggesting there is almost no relationship between its grading and win shares.
+
+```{r}
+
+grade_cor <- nba_draft_gpa |>
+  select(WS, espn_gr, cbs_gr, br_gr, yahoo_gr, ringer_gr) %>%
+  summarise(across(everything(), ~ cor(., WS, use = "complete.obs")))
+
+print(grade_cor)
+
+```
+
+Below, I'm doing the same analysis, but with VORP. The Ringer and Yahoo once again distinguish themselves with their grades aligning well with player value in this metric. Followed by CBS, ESPN and BR. 
+
+```{r}
+
+vorp_grade_cor <- nba_draft_gpa |>
+  select(VORP, espn_gr, cbs_gr, br_gr, yahoo_gr, ringer_gr) %>%
+  summarise(across(everything(), ~ cor(., VORP, use = "complete.obs")))
+
+print(vorp_grade_cor)
+
+```
+
+Finally, I'm trying it with BPM. In this case, The Ringer's draft grades seem to show the strongest relationship with Box Plus/Minus (BPM).
+
+```{r}
+
+bpm_grade_cor <- nba_draft_gpa |>
+  select(BPM, espn_gr, cbs_gr, br_gr, yahoo_gr, ringer_gr) %>%
+  summarise(across(everything(), ~ cor(., BPM, use = "complete.obs")))
+
+print(bpm_grade_cor)
+
+```
+
+So already, I see that Yahoo and The Ringer are establishing themselves as draft grade leaders based on the metrics I've chosen to look at. 
+
+Next, with the help of ChatGPT (https://chatgpt.com/share/6715c5af-8e08-8010-ba09-0b1f23aea035), I've tried to create an adjusted GPA for each player to compare to their specific and average grades across publications. However, I'm not entirely satisfied with it as it's grading more recent draft picks incredibly poorly because of their lack of production compared to older players with several years of experience in the league. At the moment, I'm not entirely sure how to address that issue.
+
+```{r}
+
+exclude_columns <- c("yr", "Rk", "Pk", "Tm", "espn_gr", "cbs_gr", "br_gr", "yahoo_gr", "ringer_gr", "avg_grade")
+
+columns_for_gpa <- nba_draft_gpa |>
+  select_if(is.numeric) |>
+  select(-one_of(exclude_columns)) |>
+  names()
+
+nba_data_full <- nba_draft_gpa |>
+  mutate(player_gpa = rowMeans(select(nba_draft_gpa, all_of(columns_for_gpa)), na.rm = TRUE),
+         player_gpa = (player_gpa / max(player_gpa, na.rm = TRUE)) * 4.0)
+
+print(nba_data_full)
+
+```
+
+
+Instead, I'm going to assign GPA values to the three major metrics I noted earlier in the markdown file --- VORP, WS and BPM. With these GPAs, I'm going to need to develop a way to figure out how to compare each one to the original draft grade and determine if the publication grades are similar/accurate. 
+
+```{r}
+nba_draft_gpa <- nba_draft_gpa |>
+  mutate(vorp_gpa = case_when(
+    VORP > 25 ~ 4.3,     # A+
+    VORP > 20 & VORP <= 25 ~ 4.0,  # A
+    VORP > 15 & VORP <= 20 ~ 3.7,  # A-
+    VORP > 10 & VORP <= 15 ~ 3.3,  # B+
+    VORP > 5 & VORP <= 10 ~ 3.0,   # B
+    VORP > 0 & VORP <= 5 ~ 2.7,    # B-
+    VORP > -5 & VORP <= 0 ~ 2.3,   # C+
+    VORP > -10 & VORP <= -5 ~ 2.0, # C
+    VORP > -15 & VORP <= -10 ~ 1.7, # C-
+    VORP > -20 & VORP <= -15 ~ 1.0, # D
+    VORP <= -20 ~ 0.0,   # F
+    TRUE ~ NA_real_  # Handle any missing values in VORP
+  ))
+
+```
+
+```{r}
+
+nba_draft_gpa <- nba_draft_gpa |>
+  mutate(
+    bpm_gpa = case_when(
+      BPM > 8 ~ 4.3, # A+
+      BPM > 6 & BPM <= 8 ~ 4.0, # A
+      BPM > 4 & BPM <= 6 ~ 3.7, # A-
+      BPM > 2 & BPM <= 4 ~ 3.3, # B+
+      BPM > 0 & BPM <= 2 ~ 3.0, # B
+      BPM > -2 & BPM <= 0 ~ 2.7, # B-
+      BPM > -4 & BPM <= -2 ~ 2.3, # C+
+      BPM > -6 & BPM <= -4 ~ 2.0, # C
+      BPM > -8 & BPM <= -6 ~ 1.7, # C-
+      BPM > -10 & BPM <= -8 ~ 1.0, # D
+      BPM <= -10 ~ 0.0, # F
+      TRUE ~ NA_real_
+    ))
+```
+
+```{r}
+nba_draft_gpa <- nba_draft_gpa |>
+  mutate(
+    ws_gpa = case_when(
+      WS > 80 ~ 4.3,  # A+
+      WS > 60 & WS <= 80 ~ 4.0,  # A
+      WS > 40 & WS <= 60 ~ 3.7,  # A-
+      WS > 30 & WS <= 40 ~ 3.3,  # B+
+      WS > 20 & WS <= 30 ~ 3.0,  # B
+      WS > 10 & WS <= 20 ~ 2.7,  # B-
+      WS > 5 & WS <= 10 ~ 2.3,   # C+
+      WS > 0 & WS <= 5 ~ 2.0,    # C
+      WS > -5 & WS <= 0 ~ 1.7,   # C-
+      WS > -10 & WS <= -5 ~ 1.0, # D
+      WS <= -10 ~ 0.0, # F
+      TRUE ~ NA_real_
+    ))
+
+```
 
 
 
