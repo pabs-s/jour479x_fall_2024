@@ -1,0 +1,378 @@
+###JOUR479X: First Presentation | By Pablo Suarez
+
+For my first presentation this semester, I tasked myself with assessing NBA media post-draft grades for lottery picks (1-14) between 2011 and 2023. My goal was to identify if there was a specific outlet that stood out regarding adequately grading prospects. To do this, I pulled published articles from outlets like ESPN, CBS Sports, The Ringer, Bleacher Report and Yahoo! Sports, and gathered pick order and player statistics from Basketball Reference. 
+
+My first step in this process was to load in the necessary libraries and read in the draft and individual statistical data. Then, I joined the data frames and added a "year" column. Following that step, I loaded in my grade data from the data frame I created and counted up the grades to provide a visual distribution of grades dished out by the media over my desired timeframe.
+
+The visualization showed that media members tend to overwhelmingly dish out A's and B's. 
+
+```{r}
+
+library(readr)
+library(tidyverse)
+library(purrr)
+library(scales)
+library(ggplot2)
+
+```
+
+```{r}
+
+rookie11 <- read_csv("https://raw.githubusercontent.com/pabs-s/jour479x_fall_2024/refs/heads/main/data/rookie11.csv")
+rookie12 <- read_csv("https://raw.githubusercontent.com/pabs-s/jour479x_fall_2024/refs/heads/main/data/rookie12.csv")
+rookie13 <- read_csv("https://raw.githubusercontent.com/pabs-s/jour479x_fall_2024/refs/heads/main/data/rookie13.csv")
+rookie14 <- read_csv("https://raw.githubusercontent.com/pabs-s/jour479x_fall_2024/refs/heads/main/data/rookie14.csv")
+rookie15 <- read_csv("https://raw.githubusercontent.com/pabs-s/jour479x_fall_2024/refs/heads/main/data/rookie15.csv")
+rookie16 <- read_csv("https://raw.githubusercontent.com/pabs-s/jour479x_fall_2024/refs/heads/main/data/rookie16.csv")
+rookie17 <- read_csv("https://raw.githubusercontent.com/pabs-s/jour479x_fall_2024/refs/heads/main/data/rookie17.csv")
+rookie18 <- read_csv("https://raw.githubusercontent.com/pabs-s/jour479x_fall_2024/refs/heads/main/data/rookie18.csv")
+rookie19 <- read_csv("https://raw.githubusercontent.com/pabs-s/jour479x_fall_2024/refs/heads/main/data/rookie19.csv")
+rookie20 <- read_csv("https://raw.githubusercontent.com/pabs-s/jour479x_fall_2024/refs/heads/main/data/rookie20.csv")
+rookie21 <- read_csv("https://raw.githubusercontent.com/pabs-s/jour479x_fall_2024/refs/heads/main/data/rookie21.csv")
+rookie22 <- read_csv("https://raw.githubusercontent.com/pabs-s/jour479x_fall_2024/refs/heads/main/data/rookie22.csv")
+rookie23 <- read_csv("https://raw.githubusercontent.com/pabs-s/jour479x_fall_2024/refs/heads/main/data/rookie23.csv")
+
+```
+
+```{r}
+
+rookie11 <- rookie11 |> mutate(yr = 2011) |> select(yr, everything())
+rookie12 <- rookie12 |> mutate(yr = 2012) |> select(yr, everything())
+rookie13 <- rookie13 |> mutate(yr = 2013) |> select(yr, everything())
+rookie14 <- rookie14 |> mutate(yr = 2014) |> select(yr, everything())
+rookie15 <- rookie15 |> mutate(yr = 2015) |> select(yr, everything())
+rookie16 <- rookie16 |> mutate(yr = 2016) |> select(yr, everything())
+rookie17 <- rookie17 |> mutate(yr = 2017) |> select(yr, everything())
+rookie18 <- rookie18 |> mutate(yr = 2018) |> select(yr, everything())
+rookie19 <- rookie19 |> mutate(yr = 2019) |> select(yr, everything())
+rookie20 <- rookie20 |> mutate(yr = 2020) |> select(yr, everything())
+rookie21 <- rookie21 |> mutate(yr = 2021) |> select(yr, everything())
+rookie22 <- rookie22 |> mutate(yr = 2022) |> select(yr, everything())
+rookie23 <- rookie23 |> mutate(yr = 2023) |> select(yr, everything())
+
+nba_draft <- bind_rows(rookie11, rookie12, rookie13, rookie14, rookie15, rookie16, rookie17, rookie18, rookie19, rookie20, rookie21, rookie22, rookie23)
+
+```
+
+```{r}
+
+draft_grades <- read_csv("https://raw.githubusercontent.com/pabs-s/jour479x_fall_2024/refs/heads/main/data/draft_grades.csv")
+
+grade_count <- draft_grades |>
+  pivot_longer(cols = everything(), names_to = "source", values_to = "grade") |>
+  drop_na() |> 
+  group_by(grade) |>
+  summarise(count = n(), .groups = "drop")
+
+print(grade_count)
+
+```
+
+```{r}
+ggplot() + 
+  geom_bar(
+    data=grade_count, 
+    aes(x=reorder(grade, -count),
+        weight=count)) + 
+  scale_y_continuous(labels=comma) + 
+  labs(
+    title="The Media Tends to Highly Grade NBA Lottery Picks", 
+    x="Letter Grades", 
+    y="Count",
+    subtitle = "Lottery picks mostly hover in the A-B range",
+    caption = "Data from ESPN, CBS, Yahoo Sports, Bleacher Report and The Ringer | By Pablo Suarez"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title =  element_text(size = 15),
+    plot.subtitle = element_text(size = 10)  
+  )
+
+```
+
+-------------
+
+After conducting that preliminary analysis, I then turned my focus to converting the letter grades into a 4.0 GPA scale in order to better conduct my analysis. Once I completed that step, I was able to calculate a player's average draft grade, which would later serve as a baseline for comparison.
+
+```{r}
+nba_draft <- bind_cols(nba_draft, draft_grades)
+```
+
+```{r}
+
+nba_draft_gpa <- nba_draft |>
+  mutate(across(c(espn_gr, cbs_gr, br_gr, yahoo_gr, ringer_gr), 
+  ~ case_when(
+    . == "A"  ~ 4.0,
+    . == "A-" ~ 3.7,
+    . == "B+" ~ 3.3,
+    . == "B"  ~ 3.0,
+    . == "B-" ~ 2.7,
+    . == "C+" ~ 2.3,
+    . == "C"  ~ 2.0,
+    . == "C-" ~ 1.7,
+    . == "D+" ~ 1.3,
+    . == "D"  ~ 1.0,
+    . == "D-" ~ 0.7,
+    TRUE ~ NA_real_)))
+
+nba_draft_gpa <- nba_draft_gpa |>
+  mutate(avg_grade = rowMeans(cbind(espn_gr, cbs_gr, br_gr, yahoo_gr, ringer_gr), na.rm = TRUE))
+
+```
+
+With this revised data frame, I immediately wanted to see the lowest graded players by average. At this stage, I also added player metrics through which to evaluate the players: VORP (Value Over Replacement Player), BPM (Box Score Plus/Minus) and Win Shares. 
+
+VORP measures a player's contribution compared to a replacement-level player, while BPM estimates a player’s net impact on the team per 100 possessions, accounting for both offensive and defensive contributions. Win share accounts for a player's impact translated to wins for their team across their career. In the case of all of these stats, higher numbers are indicators of a good player. 
+
+```{r}
+
+nba_draft_gpa |>
+  filter(!is.na(avg_grade)) |>             
+  arrange(avg_grade) |>
+  select(yr, Pk, Player, avg_grade, VORP, BPM, WS)
+
+```
+
+Maryland's own Jalen Smith, drafted in 2020, received the lowest average marks from media pundits. However, he's still slightly better than replacement level players. The first player that stands out to me is Cameron Johnson, who has nearly double Jalen Smith's win share in with one less year played and is positive across the metrics examined.
+
+```{r}
+
+nba_draft_gpa |>
+  filter(!is.na(avg_grade) & !is.na(WS)) |> 
+  arrange(desc(avg_grade), WS) |>            
+  select(yr, Pk, Player, avg_grade, VORP, BPM, WS)          
+  head(20)  
+
+```
+
+Conversely, I found players with the highest average draft grades. A few things to keep in mind with more recently drafted players: They haven't had as much of an opportunity to generate high win share due to lack of experience or being on rebuilding teams. 
+
+```{r}
+
+grade_cor <- nba_draft_gpa |>
+  select(WS, espn_gr, cbs_gr, br_gr, yahoo_gr, ringer_gr) %>%
+  summarise(across(everything(), ~ cor(., WS, use = "complete.obs")))
+
+print(grade_cor)
+
+```
+
+The code above identified the correlation between the collected draft grades and a player's win share.
+
+Yahoo showed the strongest positive correlation, suggesting that its grades tend to only somewhat align with how successful players are in win shares. The Ringer has a modest positive correlation, while ESPN and CBS have weak positive correlations. Bleacher Report scored the lowest, suggesting there is almost no relationship between its grading and win shares.
+
+Below, I conducted the same analysis, but with VORP. The Ringer and Yahoo once again distinguish themselves with their grades aligning well with player value in this metric. Followed by CBS, ESPN and BR. 
+
+```{r}
+
+vorp_grade_cor <- nba_draft_gpa |>
+  select(VORP, espn_gr, cbs_gr, br_gr, yahoo_gr, ringer_gr) %>%
+  summarise(across(everything(), ~ cor(., VORP, use = "complete.obs")))
+
+print(vorp_grade_cor)
+
+```
+
+With Box Plus/Minus (BPM), The Ringer's draft grades seem to show the strongest relationship in this metric.
+
+```{r}
+
+bpm_grade_cor <- nba_draft_gpa |>
+  select(BPM, espn_gr, cbs_gr, br_gr, yahoo_gr, ringer_gr) %>%
+  summarise(across(everything(), ~ cor(., BPM, use = "complete.obs")))
+
+print(bpm_grade_cor)
+
+```
+
+Based on my chosen metrics and analysis to this point, I felt that The Ringer and Yahoo distinguished themselves as superior draft graders in comparison to the other publications. 
+
+I then tried to create an adjusted GPA for each player to compare to their specific and average grades across publications. However, I chose to exclude it here because the grades were much harsher on recent draft picks given that their lack of production paled in comparison to players from earlier drafts. One potential solution to this problem was to narrow the grade's scope to within two years of being drafted. However, this would have required adding individual season-by-season player data for each player, as opposed to the career statistics I built the data frame around. 
+
+Instead, I opted to assign GPA values to the three major metrics I noted earlier in the markdown file --- VORP, WS and BPM. With these GPAs, I shifted my analysis from my initial research question about grading specific publications to identifying players who were evaluated incorrectly based on their average grade compared to their actual output.
+
+```{r}
+nba_draft_gpa <- nba_draft_gpa |>
+  mutate(vorp_gpa = case_when(
+    VORP > 25 ~ 4.3,     # A+
+    VORP > 20 & VORP <= 25 ~ 4.0,  # A
+    VORP > 15 & VORP <= 20 ~ 3.7,  # A-
+    VORP > 10 & VORP <= 15 ~ 3.3,  # B+
+    VORP > 5 & VORP <= 10 ~ 3.0,   # B
+    VORP > 0 & VORP <= 5 ~ 2.7,    # B-
+    VORP > -5 & VORP <= 0 ~ 2.3,   # C+
+    VORP > -10 & VORP <= -5 ~ 2.0, # C
+    VORP > -15 & VORP <= -10 ~ 1.7, # C-
+    VORP > -20 & VORP <= -15 ~ 1.0, # D
+    VORP <= -20 ~ 0.0,   # F
+    TRUE ~ NA_real_  # Handle any missing values in VORP
+  ))
+
+```
+
+```{r}
+
+nba_draft_gpa <- nba_draft_gpa |>
+  mutate(
+    bpm_gpa = case_when(
+      BPM > 8 ~ 4.3, # A+
+      BPM > 6 & BPM <= 8 ~ 4.0, # A
+      BPM > 4 & BPM <= 6 ~ 3.7, # A-
+      BPM > 2 & BPM <= 4 ~ 3.3, # B+
+      BPM > 0 & BPM <= 2 ~ 3.0, # B
+      BPM > -2 & BPM <= 0 ~ 2.7, # B-
+      BPM > -4 & BPM <= -2 ~ 2.3, # C+
+      BPM > -6 & BPM <= -4 ~ 2.0, # C
+      BPM > -8 & BPM <= -6 ~ 1.7, # C-
+      BPM > -10 & BPM <= -8 ~ 1.0, # D
+      BPM <= -10 ~ 0.0, # F
+      TRUE ~ NA_real_
+    ))
+```
+
+```{r}
+nba_draft_gpa <- nba_draft_gpa |>
+  mutate(
+    ws_gpa = case_when(
+      WS > 80 ~ 4.3,  # A+
+      WS > 60 & WS <= 80 ~ 4.0,  # A
+      WS > 40 & WS <= 60 ~ 3.7,  # A-
+      WS > 30 & WS <= 40 ~ 3.3,  # B+
+      WS > 20 & WS <= 30 ~ 3.0,  # B
+      WS > 10 & WS <= 20 ~ 2.7,  # B-
+      WS > 5 & WS <= 10 ~ 2.3,   # C+
+      WS > 0 & WS <= 5 ~ 2.0,    # C
+      WS > -5 & WS <= 0 ~ 1.7,   # C-
+      WS > -10 & WS <= -5 ~ 1.0, # D
+      WS <= -10 ~ 0.0, # F
+      TRUE ~ NA_real_
+    ))
+
+```
+
+Starting with VORP, I calculated the differences between each player's draft and VORP GPA. I chose to visualize the findings with a dumbbell chart to reflect the discrepancy between the two values.  
+
+The resulting graphic showed that Jalen Smith and Bam Adebayo have significantly exceeded the media's expectations of their draft selection, at least in VORP. Among the top ten highest VORP differences in the dataset, they are the only two to have a positive impact. 
+
+```{r}
+
+vorp_disc <- nba_draft_gpa |>
+  mutate(discrepancy = abs(vorp_gpa - avg_grade)) |>
+  arrange(desc(discrepancy)) |>
+  slice_head(n = 10) |>
+  select(yr, Pk, Player, Yrs, VORP, avg_grade, vorp_gpa, discrepancy)
+
+```
+
+```{r}
+
+ggplot(vorp_disc, aes(y = reorder(Player, -discrepancy))) +
+  geom_segment(aes(x = avg_grade, xend = vorp_gpa, yend = Player), color = "gray") +
+  geom_point(aes(x = avg_grade), color = "black", size = 3) +
+  geom_point(aes(x = vorp_gpa), color = "orange", size = 3) +
+  scale_x_continuous(breaks = seq(0, 4.5, by = 0.25)) +
+  labs(
+    title = "Smith and Adebayo Shrugged Off Media Draft Projections",
+    subtitle = "Both players significantly exceeded expectations with VORP performance",
+    x = "GPA Scale",
+    y = "Player",
+    caption = "Black: Average Draft Grade GPA, Orange: Actual VORP GPA (Data from Basketball Ref and Media Outlets) | By Pablo Suarez"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title =  element_text(size = 15),
+    plot.subtitle = element_text(size = 10)  
+  )
+
+```
+
+Following the same process with BPM, Johnny Davis immediately stands out as the player with the lowest overall BPM GPA. Scoot Henderson also gets a shout after dropping two full points. However, unlike Davis who has two full seasons under his belt, Henderson has only completed his rookie season and is looking to rectify his poor opening campaign this year. In that regard, the data is slightly skewed against him, but it's still worthwhile to see how that No.2 overall pick struggled to get acclimated to NBA basketball.  
+
+```{r}
+
+bpm_disc <- nba_draft_gpa |>
+  mutate(discrepancy = abs(bpm_gpa - avg_grade)) |>
+  arrange(desc(discrepancy)) |>
+  slice_head(n = 10) |>
+  select(yr, Pk, Player, Yrs, VORP, avg_grade, bpm_gpa, discrepancy)
+
+```
+
+```{r}
+
+ggplot(bpm_disc, aes(y = reorder(Player, -discrepancy))) +
+  geom_segment(aes(x = avg_grade, xend = bpm_gpa, yend = Player), color = "gray") +
+  geom_point(aes(x = avg_grade), color = "black", size = 3) +
+  geom_point(aes(x = bpm_gpa), color = "orange", size = 3) +
+  scale_x_continuous(breaks = seq(0, 4.5, by = 0.25)) +
+  labs(
+    title = "Johnny Davis in a (Disappointing) League of His Own",
+    subtitle = "Top Ten Players with a Volatile Box Plus/Minus Differential", 
+    x = "GPA Scale",
+    y = "Player",
+    caption = "Black: Average Draft Grade GPA, Orange: Actual BPM GPA (Data from Basketball Ref and Media Outlets) | By Pablo Suarez"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title =  element_text(size = 15),
+    plot.subtitle = element_text(size = 10)  
+  )
+
+```
+
+Similar to what I mentioned for Henderson's low score, I chose to calculate win share per year as that metric was negatively skewed for more recently drafted players. To do this, I divided win share values by a player's number of years played in the NBA. 
+
+```{r}
+
+wspy_nba_draft_gpa <- nba_draft_gpa |>
+  mutate(ws_per_year = ifelse(Yrs > 0, WS / Yrs, NA))
+
+high_ws_low_gpa <- wspy_nba_draft_gpa |>
+  filter(!is.na(ws_per_year), !is.na(avg_grade)) |>
+  arrange(desc(ws_per_year), avg_grade) |>
+  slice_head(n = 10)
+
+high_gpa_low_ws <- wspy_nba_draft_gpa |>
+  filter(!is.na(ws_per_year), !is.na(avg_grade)) |>
+  arrange(desc(avg_grade), ws_per_year) |>
+  slice_head(n = 10)
+
+```
+
+```{r}
+
+ggplot(high_ws_low_gpa, aes(x = reorder(Player, ws_per_year), y = ws_per_year, fill = avg_grade)) +
+  geom_bar(stat = "identity") +
+  scale_fill_gradient(low = "lightblue", high = "darkblue", limits = c(min(high_ws_low_gpa$avg_grade), max(high_ws_low_gpa$avg_grade))) +
+  labs(
+    title = "The Superstars Live Up to the Billing",
+    x = "Player",
+    y = "Win Share per Year",
+    fill = "Average Draft GPA",
+   caption = "Data from Basketball Ref and Media Outlets | By Pablo Suarez"
+  ) +
+  coord_flip() +
+  theme_minimal()
+
+```
+
+To an unsurprising extent, the players that appeared in this analysis were still primarily modern-NBA superstars. However, some players, like Joel Embiid with his average GPA of 3.2 on draft night, have shown through win share why they warranted their lottery selection. Once again, we see Bam Adebayo proving his draft night doubters wrong with his ascension to becoming a premier NBA player.
+
+```{r}
+
+ggplot(high_ws_low_gpa, aes(x = reorder(Player, ws_per_year), y = ws_per_year, fill = avg_grade)) +
+  geom_bar(stat = "identity") +
+ scale_fill_gradient2(low = "black", mid = "grey", high = "red", midpoint = median(high_ws_low_gpa$avg_grade, na.rm = TRUE)) +
+  labs(
+    title = "The Superstars Live Up to the Billing",
+    x = "Player",
+    y = "Win Share per Year",
+    fill = "Average Draft GPA",
+   caption = "Data from Basketball Ref and Media Outlets | By Pablo Suarez"
+  ) +
+  coord_flip() +
+  theme_minimal()
+
+```
+

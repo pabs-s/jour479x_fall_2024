@@ -32,6 +32,7 @@ library(tidyverse)
 library(purrr)
 library(scales)
 library(ggplot2)
+library(ggalt)
 
 ```
 
@@ -400,6 +401,145 @@ nba_draft_gpa <- nba_draft_gpa |>
 
 ```
 
+Starting with VORP, I calculated the differences between each player's draft and VORP GPA. I chose to visualize the findings with a dumbbell chart to reflect the discrepancy between the two values.  
+
+```{r}
+
+vorp_disc <- nba_draft_gpa |>
+  mutate(discrepancy = abs(vorp_gpa - avg_grade)) |>
+  arrange(desc(discrepancy)) |>
+  slice_head(n = 10) |>
+  select(yr, Pk, Player, Yrs, VORP, avg_grade, vorp_gpa, discrepancy)
+
+```
+
+```{r}
+
+ggplot(vorp_disc, aes(y = reorder(Player, -discrepancy))) +
+  geom_segment(aes(x = avg_grade, xend = vorp_gpa, yend = Player), color = "gray") +
+  geom_point(aes(x = avg_grade), color = "black", size = 3) +
+  geom_point(aes(x = vorp_gpa), color = "orange", size = 3) +
+  scale_x_continuous(breaks = seq(0, 4.5, by = 0.25)) +
+  labs(
+    title = "The Media Severely Underrated Jalen Smith and Bam Adebayo",
+    x = "GPA Scale",
+    y = "Player",
+    caption = "Black: Average Draft Grade GPA, Orange: Actual VORP GPA (Data from Basketball Ref and Media Outlets) | By Pablo Suarez"
+  ) +
+  theme_minimal()
+
+```
+
+```{r}
+
+bpm_disc <- nba_draft_gpa |>
+  mutate(discrepancy = abs(bpm_gpa - avg_grade)) |>
+  arrange(desc(discrepancy)) |>
+  slice_head(n = 10) |>
+  select(yr, Pk, Player, Yrs, VORP, avg_grade, bpm_gpa, discrepancy)
+
+```
+
+```{r}
+
+ggplot(bpm_disc, aes(y = reorder(Player, -discrepancy))) +
+  geom_segment(aes(x = avg_grade, xend = bpm_gpa, yend = Player), color = "gray") +
+  geom_point(aes(x = avg_grade), color = "black", size = 3) +
+  geom_point(aes(x = bpm_gpa), color = "orange", size = 3) +
+  scale_x_continuous(breaks = seq(0, 4.5, by = 0.25)) +
+  labs(
+    title = "Johnny Davis in a (Disappointing) League of His Own",
+    subtitle = "Top Ten Players with a Volatile Box Plus/Minus Differential", 
+    x = "GPA Scale",
+    y = "Player",
+    caption = "Black: Average Draft Grade GPA, Orange: Actual BPM GPA (Data from Basketball Ref and Media Outlets) | By Pablo Suarez"
+  ) +
+  theme_minimal()
+
+```
+
+```{r}
+
+ws_disc <- nba_draft_gpa |>
+  mutate(discrepancy = abs(ws_gpa - avg_grade)) |>
+  arrange(desc(discrepancy)) |>
+  slice_head(n = 10) |>
+  select(yr, Pk, Player, Yrs, VORP, avg_grade, ws_gpa, discrepancy)
+
+```
+
+```{r}
+
+ggplot(ws_disc, aes(y = reorder(Player, -discrepancy))) +
+  geom_segment(aes(x = avg_grade, xend = ws_gpa, yend = Player), color = "gray") +
+  geom_point(aes(x = avg_grade), color = "black", size = 3) +
+  geom_point(aes(x = ws_gpa), color = "orange", size = 3) +
+  scale_x_continuous(breaks = seq(0, 4.5, by = 0.25)) +
+  labs(
+    title = "Win Share",
+    x = "GPA Scale",
+    y = "Player",
+    caption = "Black: Average Draft Grade GPA, Orange: Actual VORP GPA (Data from Basketball Ref and Media Outlets) | By Pablo Suarez"
+  ) +
+  theme_minimal()
+
+```
+
+
+```{r}
+
+wspy_nba_draft_gpa <- nba_draft_gpa |>
+  mutate(ws_per_year = ifelse(Yrs > 0, WS / Yrs, NA))
+
+```
+
+```{r}
+
+wspy_nba_draft_gpa <- nba_draft_gpa |>
+  mutate(ws_per_year = ifelse(Yrs > 0, WS / Yrs, NA))
+
+high_ws_low_gpa <- wspy_nba_draft_gpa |>
+  filter(!is.na(ws_per_year), !is.na(avg_grade)) |>
+  arrange(desc(ws_per_year), avg_grade) |>
+  slice_head(n = 10)
+
+high_gpa_low_ws <- wspy_nba_draft_gpa |>
+  filter(!is.na(ws_per_year), !is.na(avg_grade)) |>
+  arrange(desc(avg_grade), ws_per_year) |>
+  slice_head(n = 10)
+
+```
+
+
+```{r}
+
+ggplot(high_ws_low_gpa, aes(x = reorder(Player, ws_per_year), y = ws_per_year, fill = avg_grade)) +
+  geom_bar(stat = "identity") +
+ scale_fill_gradient2(low = "black", mid = "grey", high = "red", midpoint = median(high_ws_low_gpa$avg_grade, na.rm = TRUE)) +
+  labs(
+    title = "The Superstars Live Up to the Billing",
+    x = "Player",
+    y = "Win Share per Year",
+    fill = "Average Draft GPA",
+   caption = "Data from Basketball Ref and Media Outlets | By Pablo Suarez"
+  ) +
+  coord_flip() +
+  theme_minimal()
+
+```
+```{r}
+ggplot(high_gpa_low_ws, aes(x = reorder(Player, avg_grade), y = avg_grade, fill = ws_per_year)) +
+  geom_bar(stat = "identity") +
+  scale_fill_gradient2(low = "black", mid = "grey", high = "red", midpoint = median(high_gpa_low_ws$avg_grade, na.rm = TRUE)) +
+  labs(
+    title = "High avg_gpa with Low Win Share per Year",
+    x = "Player",
+    y = "Average GPA",
+    fill = "Win Share per Year"
+  ) +
+  theme_minimal() +
+  coord_flip()
+```
 
 
 
