@@ -1,10 +1,10 @@
-###JOUR479X: First Presentation | By Pablo Suarez
+###JOUR479X: First Presentation \| By Pablo Suarez
 
-For my first presentation this semester, I tasked myself with assessing NBA media post-draft grades for lottery picks (1-14) between 2011 and 2023. My goal was to identify if there was a specific outlet that stood out regarding adequately grading prospects. To do this, I pulled published articles from outlets like ESPN, CBS Sports, The Ringer, Bleacher Report and Yahoo! Sports, and gathered pick order and player statistics from Basketball Reference. 
+For my first presentation this semester, I tasked myself with assessing NBA media post-draft grades for lottery picks (1-14) between 2011 and 2023. My goal was to identify if there was a specific outlet that stood out regarding adequately grading prospects. To do this, I pulled published articles from outlets like ESPN, CBS Sports, The Ringer, Bleacher Report and Yahoo! Sports, and gathered pick order and player statistics from Basketball Reference.
 
 My first step in this process was to load in the necessary libraries and read in the draft and individual statistical data. Then, I joined the data frames and added a "year" column. Following that step, I loaded in my grade data from the data frame I created and counted up the grades to provide a visual distribution of grades dished out by the media over my desired timeframe.
 
-The visualization showed that media members tend to overwhelmingly dish out A's and B's. 
+The visualization showed that media members tend to overwhelmingly dish out A's and B's.
 
 ```{r}
 
@@ -90,7 +90,7 @@ ggplot() +
 
 ```
 
--------------
+------------------------------------------------------------------------
 
 After conducting that preliminary analysis, I then turned my focus to converting the letter grades into a 4.0 GPA scale in order to better conduct my analysis. Once I completed that step, I was able to calculate a player's average draft grade, which would later serve as a baseline for comparison.
 
@@ -121,9 +121,9 @@ nba_draft_gpa <- nba_draft_gpa |>
 
 ```
 
-With this revised data frame, I immediately wanted to see the lowest graded players by average. At this stage, I also added player metrics through which to evaluate the players: VORP (Value Over Replacement Player), BPM (Box Score Plus/Minus) and Win Shares. 
+With this revised data frame, I immediately wanted to see the lowest graded players by average. At this stage, I also added player metrics through which to evaluate the players: VORP (Value Over Replacement Player), BPM (Box Score Plus/Minus) and Win Shares.
 
-VORP measures a player's contribution compared to a replacement-level player, while BPM estimates a player’s net impact on the team per 100 possessions, accounting for both offensive and defensive contributions. Win share accounts for a player's impact translated to wins for their team across their career. In the case of all of these stats, higher numbers are indicators of a good player. 
+VORP measures a player's contribution compared to a replacement-level player, while BPM estimates a player’s net impact on the team per 100 possessions, accounting for both offensive and defensive contributions. Win share accounts for a player's impact translated to wins for their team across their career. In the case of all of these stats, higher numbers are indicators of a good player.
 
 ```{r}
 
@@ -146,7 +146,7 @@ nba_draft_gpa |>
 
 ```
 
-Conversely, I found players with the highest average draft grades. A few things to keep in mind with more recently drafted players: They haven't had as much of an opportunity to generate high win share due to lack of experience or being on rebuilding teams. 
+Conversely, I found players with the highest average draft grades. A few things to keep in mind with more recently drafted players: They haven't had as much of an opportunity to generate high win share due to lack of experience or being on rebuilding teams.
 
 ```{r}
 
@@ -162,7 +162,7 @@ The code above identified the correlation between the collected draft grades and
 
 Yahoo showed the strongest positive correlation, suggesting that its grades tend to only somewhat align with how successful players are in win shares. The Ringer has a modest positive correlation, while ESPN and CBS have weak positive correlations. Bleacher Report scored the lowest, suggesting there is almost no relationship between its grading and win shares.
 
-Below, I conducted the same analysis, but with VORP. The Ringer and Yahoo once again distinguish themselves with their grades aligning well with player value in this metric. Followed by CBS, ESPN and BR. 
+Below, I conducted the same analysis, but with VORP. The Ringer and Yahoo once again distinguish themselves with their grades aligning well with player value in this metric. Followed by CBS, ESPN and BR.
 
 ```{r}
 
@@ -186,9 +186,9 @@ print(bpm_grade_cor)
 
 ```
 
-Based on my chosen metrics and analysis to this point, I felt that The Ringer and Yahoo distinguished themselves as superior draft graders in comparison to the other publications. 
+Based on my chosen metrics and analysis to this point, I felt that The Ringer and Yahoo distinguished themselves as superior draft graders in comparison to the other publications.
 
-I then tried to create an adjusted GPA for each player to compare to their specific and average grades across publications. However, I chose to exclude it here because the grades were much harsher on recent draft picks given that their lack of production paled in comparison to players from earlier drafts. One potential solution to this problem was to narrow the grade's scope to within two years of being drafted. However, this would have required adding individual season-by-season player data for each player, as opposed to the career statistics I built the data frame around. 
+I then tried to create an adjusted GPA for each player to compare to their specific and average grades across publications. However, I chose to exclude it here because the grades were much harsher on recent draft picks given that their lack of production paled in comparison to players from earlier drafts. One potential solution to this problem was to narrow the grade's scope to within two years of being drafted. However, this would have required adding individual season-by-season player data for each player, as opposed to the career statistics I built the data frame around.
 
 Instead, I opted to assign GPA values to the three major metrics I noted earlier in the markdown file --- VORP, WS and BPM. With these GPAs, I shifted my analysis from my initial research question about grading specific publications to identifying players who were evaluated incorrectly based on their average grade compared to their actual output.
 
@@ -251,9 +251,9 @@ nba_draft_gpa <- nba_draft_gpa |>
 
 ```
 
-Starting with VORP, I calculated the differences between each player's draft and VORP GPA. I chose to visualize the findings with a dumbbell chart to reflect the discrepancy between the two values.  
+Starting with VORP, I calculated the differences between each player's draft and VORP GPA. I chose to visualize the findings with a dumbbell chart to reflect the discrepancy between the two values.
 
-The resulting graphic showed that Jalen Smith and Bam Adebayo have significantly exceeded the media's expectations of their draft selection, at least in VORP. Among the top ten highest VORP differences in the dataset, they are the only two to have a positive impact. 
+The resulting graphic showed that Jalen Smith and Bam Adebayo have significantly exceeded the media's expectations of their draft selection, at least in VORP. Among the top ten highest VORP differences in the dataset, they are the only two to have a positive impact.
 
 ```{r}
 
@@ -287,7 +287,7 @@ ggplot(vorp_disc, aes(y = reorder(Player, -discrepancy))) +
 
 ```
 
-Following the same process with BPM, Johnny Davis immediately stands out as the player with the lowest overall BPM GPA. Scoot Henderson also gets a shout after dropping two full points. However, unlike Davis who has two full seasons under his belt, Henderson has only completed his rookie season and is looking to rectify his poor opening campaign this year. In that regard, the data is slightly skewed against him, but it's still worthwhile to see how that No.2 overall pick struggled to get acclimated to NBA basketball.  
+Following the same process with BPM, Johnny Davis immediately stands out as the player with the lowest overall BPM GPA. Scoot Henderson also gets a shout after dropping two full points. However, unlike Davis who has two full seasons under his belt, Henderson has only completed his rookie season and is looking to rectify his poor opening campaign this year. In that regard, the data is slightly skewed against him, but it's still worthwhile to see how that No.2 overall pick struggled to get acclimated to NBA basketball.
 
 ```{r}
 
@@ -321,7 +321,7 @@ ggplot(bpm_disc, aes(y = reorder(Player, -discrepancy))) +
 
 ```
 
-Similar to what I mentioned for Henderson's low score, I chose to calculate win share per year as that metric was negatively skewed for more recently drafted players. To do this, I divided win share values by a player's number of years played in the NBA. 
+Similar to what I mentioned for Henderson's low score, I chose to calculate win share per year as that metric was negatively skewed for more recently drafted players. To do this, I divided win share values by a player's number of years played in the NBA.
 
 ```{r}
 
@@ -375,4 +375,3 @@ ggplot(high_ws_low_gpa, aes(x = reorder(Player, ws_per_year), y = ws_per_year, f
   theme_minimal()
 
 ```
-
