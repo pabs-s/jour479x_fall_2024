@@ -109,4 +109,34 @@ ggplot() +
   theme_minimal() + 
   labs(title = "Maryland middle of the pack among Big Ten teams", y="team")
 ```
+-------------------
+10/31/24 In-Class Joining Activity
+
+```{r}
+
+vb_rosters <- read_csv("https://thescoop.org/sports-data-files/rosters.csv")
+vbteam_stats <- read_csv("https://thescoop.org/sports-data-files/team_stats.csv")
+team_id <- read_csv("https://thescoop.org/sports-data-files/teams_with_ids.csv")
+
+```
+
+```{r}
+
+rosters_with_team_stats <- vb_rosters |>
+  inner_join(vbteam_stats, join_by(ncaa_id))
+
+#fuzzy matching exists to help join data that is the same but formatted differently
+
+```
+
+
+
+
+
+
+
+
+
+
+
 
