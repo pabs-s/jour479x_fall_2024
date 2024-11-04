@@ -1,7 +1,161 @@
 ```{r}
+
 library(tidyverse)
 library(ggalt)
 library(ggplot2)
 library(readr)
-library()
+library(usmap)
+library(maps)
+library(dplyr)
+
 ```
+
+Load in the binary answer file.
+
+```{r}
+
+hs_nil <- read_csv("https://raw.githubusercontent.com/pabs-s/jour479x_fall_2024/refs/heads/main/hs_nil/nil_clean.csv")
+hs_nil
+```
+
+Categories included so far are: 
+- State Policy: Y/N
+- Year Enacted: Y/N
+- Did we get a response from an admin?: Y/N
+- Parent or guardian permission required for entering a deal?: Y/N
+- Are boosters or collectives permitted?: Y/N
+- Requirement to notify school officials?: Y/N
+- Is there an applicable state law?: Y/N
+- Are there category restrictions?: Y/N
+
+Points of clarification for us to work through together as a class:
+- Our question about usage of school logos, names or uniforms: Are there instances where a policy specifies that athletes can use two of the three or are all three typically grouped together?
+- Is there a discrepancy between a policy's enacted date versus the date it went into effect? Which do we prefer as a class?
+- Prohibited Categories: How can we better group some of our categories for visualization? Does it make sense to create a "super category" for tobacco, nicotine, vaping and regulated/controlled substances? How can we also group illegal substances or gaming and gambling?
+- NIL Payments: Can we identify whether schools are tracking individual payments or total payments over a period of time? Are there compensation limits in either of those instances (i.e., can only earn X dollars over one school year vs X dollars in one payment). Which do these policies focus on, if specified?
+- NIL Violations and Accountability: Is there an abdication of adult/school responsibility in states where no parental guidance or school notice is required? Who is held accountable in those cases?  
+- Officiating athletic contests is a potential unique reporting line: Is Kansas the only state to make reference of student-athletes being permitted to be compensated as referees, but not as coaches? Why make that distinction in the first place? What's the state's policy on appearances for NIL and would these not fall under that? 
+
+Regarding all of these points and of the visualizations below: How are we going to describe this when we go to write it? If we were to write a paragraph about this question, what would it look like?
+
+------------
+Map visualization of state policies
+
+```{r}
+
+us_map <- map_data("state")
+
+nil_states <- hs_nil |>
+  mutate(state = tolower(state))
+
+us_map_data <- us_map("states") |>
+  mutate(full = tolower(full))  
+
+nil_usmap_data <- us_map_data |>
+  left_join(nil_states, by = c("full" = "state"))
+
+nil_usmap_data <- nil_usmap_data |>
+  mutate(state_policy = case_when(
+    full == "north carolina" ~ "Y",
+    full == "ohio" ~ "N",
+    full == "indiana" ~ "N",
+    full == "tennessee" ~ "Y",
+    full == "utah" ~ "Y",
+    full == "vermont" ~ "Y",
+    TRUE ~ state_policy 
+  ))
+
+
+```
+
+```{r}
+
+plot_usmap(data = nil_usmap_data, values = "state_policy", regions = "states") +
+  scale_fill_manual(values = c("Y" = "blue", "N" = "red"), na.value = "lightgray") +
+  labs(title = "NIL Policy Status by U.S. State", fill = "Policy Status") +
+  theme(panel.background = element_blank())
+
+```
+Notes:
+
+----------------
+Map of the South Region Based on NIL Policy Adoption.
+
+```{r}
+
+plot_usmap(data = nil_usmap_data, values = "state_policy", include = .south_region, exclude = c("VA", "WV", "MD", "DE", "DC", "KY"), regions = "states", labels = TRUE) +
+  scale_fill_manual(values = c("Y" = "blue", "N" = "red"), na.value = "lightgray") +
+  labs(title = "The South Lags in HS NIL Policy Adoption", fill = "Policy Status") +
+  theme(panel.background = element_blank())
+
+```
+
+What does this show us? Why might there be such a high concentration of states in this region that have declined to enact an NIL policy for high schoolers? Also, can we figure out approximately how many high school athletes live in this region that are impacted by these decisions?
+
+Notes:
+
+---------------
+Years enacted. 
+
+```{r}
+
+yearly_enactments <- nil_states |>
+  filter(!is.na(year_enacted)) |>
+  group_by(year_enacted) |>
+  summarise(count = n())
+
+```
+
+```{r}
+
+max_count <- max(yearly_enactments$count, na.rm = TRUE)
+
+ggplot(yearly_enactments, aes(x = factor(year_enacted), y = count)) +
+  geom_bar(stat = "identity", fill = "blue") +
+  labs(title = "Number of States Enacting NIL Policies by Year",
+       x = "Year Enacted",
+       y = "Number of States") +
+  scale_y_continuous(breaks = seq(0, max_count, by = 1)) +  
+  theme_minimal()
+
+```
+Looking at these results, let's see what we can find out about that jump in 2022. Which states set the tone in 2021 and what do we think was the catalyst in 2022?
+Notes:
+
+
+```{r}
+nil_usmap_data <- nil_usmap_data %>%
+  mutate(year_enacted = as.character(year_enacted))
+
+# Define colors for each year
+year_colors <- c("2021" = "yellow", "2022" = "darkgreen", "2023" = "purple", "2024" = "blue")
+
+# Plot the map with states colored by the year enacted
+plot_usmap(data = nil_usmap_data, values = "year_enacted", regions = "states") +
+  scale_fill_manual(name = "Year Enacted", values = year_colors, na.value = "lightgray") +
+  labs(title = "NIL Policy Adoption by Year", fill = "Year Enacted", subtitle = "Preliminary visualization: This can be refined down to the month in a timeline format.") +
+  theme(panel.background = element_blank())
+
+```
+
+Notes:
+
+-----------------------
+Admin response: These states played ball. 
+
+```{r}
+plot_usmap(data = nil_usmap_data, values = "employee_response", regions = "states") +
+  scale_fill_manual(values = c("Y" = "blue", "N" = "red"), na.value = "lightgray") +
+  labs(title = "These States Played Ball", subtitle = "Visual distribution of states that provided a policy response.", fill = "Employee Response") +
+  theme(panel.background = element_blank())
+```
+Notes:
+
+------------------------
+
+
+
+
+
+
+
