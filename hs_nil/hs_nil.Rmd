@@ -152,7 +152,53 @@ plot_usmap(data = nil_usmap_data, values = "employee_response", regions = "state
 Notes:
 
 ------------------------
-What else do we want to see?
+Parent/Guardian Involvement and School Notification:
+
+```{r}
+
+pg_sn <- nil_usmap_data |>
+  mutate(parent_notification_combo = case_when(
+    parent_guardian == "Y" & notification == "Y" ~ "Y_Y",
+    parent_guardian == "Y" & notification == "N" ~ "Y_N",
+    parent_guardian == "N" & notification == "Y" ~ "N_Y",
+    parent_guardian == "N" & notification == "N" ~ "N_N",
+    TRUE ~ NA_character_  
+  ))
+
+combo_colors <- c("Y_Y" = "blue", "Y_N" = "purple", "N_Y" = "yellow", "N_N" = "red")
+
+```
+
+```{r}
+
+plot_usmap(data = pg_sn, values = "parent_notification_combo", regions = "states") +
+  scale_fill_manual(
+    name = "Requirement",
+    values = combo_colors,
+    labels = c(
+      "Y_Y" = "Parent/Guardian and School Notif. Required",
+      "Y_N" = "Parent/Guardian Required Only",
+      "N_Y" = "School Notif. Required Only",
+      "N_N" = "Neither Required"
+    ),
+    na.value = "lightgray"
+  ) +
+  labs(title = "Parent/Guardian and Notification Requirements in NIL Policies", fill = "Requirement") +
+  theme(
+    panel.background = element_blank(),
+    legend.position = "left",          # Moves the legend to the left side of the plot
+    legend.justification = "left",   # Centers the legend vertically on the left side
+    plot.margin = margin(10, 10, 10, 30)  # Adds space on the left to avoid clipping
+  )
+```
+
+Notes:
+
+
+------------------------
+What else do we want to see? What direction do we want to take with our reporting? What changes can we make to the Google Form to continue refining this data?
+
+
 
 
 
