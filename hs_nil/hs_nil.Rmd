@@ -95,7 +95,7 @@ What does this show us? Why might there be such a high concentration of states i
 Notes:
 
 ---------------
-Years enacted. 
+Years enacted: 
 
 ```{r}
 
@@ -146,13 +146,13 @@ Admin response: These states played ball.
 ```{r}
 plot_usmap(data = nil_usmap_data, values = "employee_response", regions = "states") +
   scale_fill_manual(values = c("Y" = "blue", "N" = "red"), na.value = "lightgray") +
-  labs(title = "These States Played Ball", subtitle = "Visual distribution of states that provided a policy response.", fill = "Employee Response") +
+  labs(title = "These States Played Ball", subtitle = "Visual distribution of states that provided a policy response to our reporters.", fill = "Employee Response") +
   theme(panel.background = element_blank())
 ```
 Notes:
 
 ------------------------
-
+What else do we want to see?
 
 
 
