@@ -20,7 +20,7 @@ hs_nil
 
 Categories included so far are: 
 - State Policy: Y/N
-- Year Enacted: Y/N
+- Year Enacted:
 - Did we get a response from an admin?: Y/N
 - Parent or guardian permission required for entering a deal?: Y/N
 - Are boosters or collectives permitted?: Y/N
@@ -30,11 +30,22 @@ Categories included so far are:
 
 Points of clarification for us to work through together as a class:
 - Our question about usage of school logos, names or uniforms: Are there instances where a policy specifies that athletes can use two of the three or are all three typically grouped together?
+School property, school-sanctioned events
+
 - Is there a discrepancy between a policy's enacted date versus the date it went into effect? Which do we prefer as a class?
+
+
 - Prohibited Categories: How can we better group some of our categories for visualization? Does it make sense to create a "super category" for tobacco, nicotine, vaping and regulated/controlled substances? How can we also group illegal substances or gaming and gambling?
+- Groupings ready for viz next week.
+
 - NIL Payments: Can we identify whether schools are tracking individual payments or total payments over a period of time? Are there compensation limits in either of those instances (i.e., can only earn X dollars over one school year vs X dollars in one payment). Which do these policies focus on, if specified?
+- Focus timing for the reporting of these deals, not so much the payment values
+
 - NIL Violations and Accountability: Is there an abdication of adult/school responsibility in states where no parental guidance or school notice is required? Who is held accountable in those cases?  
+Highlight Alaska, but also any other states that have a three-strike model. South Carolina has a three-strike policy for athletes.
+
 - Officiating athletic contests is a potential unique reporting line: Is Kansas the only state to make reference of student-athletes being permitted to be compensated as referees, but not as coaches? Why make that distinction in the first place? What's the state's policy on appearances for NIL and would these not fall under that? 
+
 
 Regarding all of these points and of the visualizations below: How are we going to describe this when we go to write it? If we were to write a paragraph about this question, what would it look like?
 
@@ -139,17 +150,21 @@ plot_usmap(data = nil_usmap_data, values = "year_enacted", regions = "states") +
 ```
 
 Notes:
-
+Proposed but denied is a potential graphic. 
 -----------------------
 Admin response: These states played ball. 
 
 ```{r}
+
 plot_usmap(data = nil_usmap_data, values = "employee_response", regions = "states") +
   scale_fill_manual(values = c("Y" = "blue", "N" = "red"), na.value = "lightgray") +
   labs(title = "These States Played Ball", subtitle = "Visual distribution of states that provided a policy response to our reporters.", fill = "Employee Response") +
   theme(panel.background = element_blank())
+
 ```
 Notes:
+North Carolina (private) -- no response
+New Mexico -- response received, but didn't "feel comfortable" answering questions.
 
 ------------------------
 Parent/Guardian Involvement and School Notification:
@@ -195,7 +210,8 @@ plot_usmap(data = pg_sn, values = "parent_notification_combo", regions = "states
 ```
 
 Notes:
-
+Specify which states don't have NIL in the legend.
+- Maryland: Neither are required (red).
 
 ------------------------
 What else do we want to see? What direction do we want to take with our reporting? What changes can we make to the Google Form to continue refining this data?
