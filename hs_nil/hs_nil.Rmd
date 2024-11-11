@@ -280,6 +280,8 @@ Feedback from the students on the previous visualizations has been implemented.
 
 - Reporting Ideas: 
 1. Three-Strike States: Pennsylvania (2022), South Carolina (2024), Florida (2024)
+What can we identify regarding the differences between these policies? What prompted them to institute a three-strike policy? Why are they the only three to implement a policy like this? What did the more recent policies adopt from Pennsylvania's policy?
+
 
 2. Limited Approval States: Mississippi (2024), Missouri (2023), Arkansas (2023), Nevada (2022)
 Mississippi allows it for students committed to any collegiate institution, Missouri and Arkansas allow it for students committed to in-state collegiate institutions and Nevada only allows it for unsanctioned sports.
@@ -287,11 +289,11 @@ Mississippi allows it for students committed to any collegiate institution, Miss
 3. 
 
 
-What I'm working on right now. Creating separate data frames for violations and prohibited NIL categories. I've created a data frame for approved NIL categories and will begin visualizing that.
+What I'm working on right now: Creating separate data frames for violations and prohibited NIL categories. I've created a data frame for approved NIL categories and will begin visualizing that.
 
 
 ```{r}
-
+perm_cat <- read_csv("https://raw.githubusercontent.com/pabs-s/jour479x_fall_2024/refs/heads/main/hs_nil/nil_permitted_categories.csv")
 ```
 
 
