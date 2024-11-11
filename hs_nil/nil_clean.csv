@@ -1,12 +1,12 @@
 state,state_policy,year_enacted,employee_response,parent_guardian,boost_collectives,notification,state_law,category_restrictions
-Michigan,N,NA,Y,NA,NA,NA,N,NA
+Michigan,N,No NIL,Y,No NIL,No NIL,NA,N,No NIL
 Delaware,Y,2024,N,NA,N,Y,Y,Y
-Mississippi,N,NA,Y,NA,NA,NA,N,NA
-Texas,N,NA,N,NA,NA,NA,N,NA
-Montana,N,NA,Y,NA,NA,NA,N,NA
-Alabama,N,NA,N,NA,NA,NA,N,NA
-Kentucky,Y,NA,Y,NA,N,NA,Y,Y
-Hawaii,N,NA,Y,NA,NA,NA,N,NA
+Mississippi,Limited,2024,Y,N,N,N,Y,Y
+Texas,N,No NIL,N,No NIL,No NIL,No NIL,N,No NIL
+Montana,N,No NIL,Y,No NIL,No NIL,No NIL,N,No NIL
+Alabama,N,No NIL,N,No NIL,No NIL,No NIL,N,No NIL
+Kentucky,Y,2023,Y,NA,N,N,Y,Y
+Hawaii,N,No NIL,Y,No NIL,No NIL,No NIL,N,No NIL
 New York,Y,2021,Y,N,N,N,N,N
 Nebraska,Y,2023,Y,N,N,N,N,Y
 Maine,Y,2022,N,NA,N,NA,N,Y
@@ -15,19 +15,19 @@ Minnesota,Y,2022,Y,N,N,N,N,Y
 Louisiana,Y,2022,Y,NA,N,NA,N,Y
 Idaho,Y,2022,Y,Y,Y,N,N,N
 Washington,Y,2022,Y,N,N,N,N,N
-Maryland,Y,2022,Y,NA,N,N,N,Y
+Maryland,Y,2022,Y,N,N,N,N,Y
 Florida,Y,2024,Y,N,Y,N,N,Y
-Missouri,Y,2024,N,N,N,N,N,N
+Missouri,Limited,2023,N,N,N,N,Y,N
 Alaska,Y,2021,Y,N,N,N,N,N
-South Carolina,N,NA,Y,N,N,N,N,Y
+South Carolina,Y,2024,Y,N,N,N,N,Y
 Washington DC,Y,2022,Y,N,N,Y,N,N
 New Hampshire,Y,2022,Y,N,N,N,N,N
 Massachusetts,Y,2022,Y,NA,NA,N,N,Y
-Arkansas,N,2024,N,NA,NA,NA,N,NA
+Arkansas,Limited,2023,N,NA,NA,NA,Y,No NIL
 Illinois,Y,2022,Y,N,N,N,Y,Y
 Oregon,Y,2022,Y,Y,N,Y,N,Y
-Nevada,Y,2022,N,N,N,N,N,N
-West Virginia,N,NA,Y,NA,NA,NA,N,NA
+Nevada,Limited,2022,N,N,N,N,Y,N
+West Virginia,N,No NIL,Y,No NIL,No NIL,No NIL,N,No NIL
 Virginia,Y,2023,Y,N,N,Y,Y,Y
 Iowa,Y,2022,Y,Y,N,N,N,Y
 New Jersey,Y,2022,Y,N,N,N,N,Y
@@ -40,9 +40,14 @@ New Mexico,Y,2023,Y,N,N,N,N,N
 Pennsylvania,Y,2022,N,N,N,Y,Y,Y
 California,Y,2021,Y,N,NA,N,N,N
 Colorado,Y,2022,N,N,NA,N,N,N
-Wyoming,Y,NA,Y,NA,NA,NA,N,NA
+Wyoming,N,No NIL,Y,No NIL,No NIL,No NIL,N,No NIL
 South Dakota ,Y,2024,N,Y,N,N,Y,Y
-Oklahoma,N,NA,Y,N,N,N,N,Y
-North Carolina(public schools),Y,2024,N,N,N,Y,N,Y
-"North Carolina(private schools, NCISAA)",Y,2024,N,Y,N,Y,N,Y
-Wisconsin,N,NA,Y,Y,Y,N,N,N
+Oklahoma,Y,2022,Y,N,NA,N,N,Y
+North Carolina (Public),Y,2024,N,N,N,Y,N,Y
+North Carolina (Private),Y,2024,N,Y,N,Y,N,Y
+Wisconsin,N,No NIL,Y,Y,Y,N,N,N
+Ohio,N,No NIL,N,No NIL,No NIL,No NIL,N,No NIL
+Indiana,N,No NIL,N,No NIL,No NIL,No NIL,N,No NIL
+Tennessee,Y,2022,N,NA,NA,NA,N,NA
+Utah,Y,2023,N,N,NA,N,N,N
+Vermont,Y,2023,N,Y,N,N,N,Y
