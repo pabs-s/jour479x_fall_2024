@@ -82,7 +82,8 @@ nil_usmap_data <- nil_usmap_data |>
 ```{r}
 
 plot_usmap(data = nil_usmap_data, values = "state_policy", regions = "states") +
-  scale_fill_manual(values = c("Y" = "blue", "N" = "red"), na.value = "lightgray") +
+  scale_fill_manual(values = c("Y" = "blue", "N" = "red", "Limited" = "yellow"),
+                    labels = c("Y" = "Yes", "N" = "No", "Limited" = "Limited")) +
   labs(title = "NIL Policy Status by U.S. State", fill = "Policy Status") +
   theme(panel.background = element_blank())
 
@@ -95,7 +96,10 @@ Map of the South Region Based on NIL Policy Adoption.
 ```{r}
 
 plot_usmap(data = nil_usmap_data, values = "state_policy", include = .south_region, exclude = c("VA", "WV", "MD", "DE", "DC", "KY"), regions = "states", labels = TRUE) +
-  scale_fill_manual(values = c("Y" = "blue", "N" = "red"), na.value = "lightgray") +
+  scale_fill_manual(
+    values = c("Y" = "blue", "N" = "red", "Limited" = "yellow"),
+    labels = c("Y" = "Yes", "N" = "No", "Limited" = "Limited")
+  ) +
   labs(title = "The South Lags in HS NIL Policy Adoption", fill = "Policy Status") +
   theme(panel.background = element_blank())
 
@@ -135,35 +139,63 @@ Notes:
 
 
 ```{r}
-nil_usmap_data <- nil_usmap_data %>%
-  mutate(year_enacted = as.character(year_enacted))
+nil_usmap_data <- nil_usmap_data |>
+  mutate(
+    year_enacted = as.character(year_enacted),
+    year_enacted_override = ifelse(full == "north carolina", "2024", year_enacted)  # Overrides North Carolina to match the "2024" color
+  )
 
-# Define colors for each year
-year_colors <- c("2021" = "yellow", "2022" = "darkgreen", "2023" = "purple", "2024" = "blue")
+# Define colors without a separate "NC" entry
+year_colors <- c("2021" = "yellow", "2022" = "darkgreen", "2023" = "purple", "2024" = "blue", "No NIL" = "grey")
 
-# Plot the map with states colored by the year enacted
-plot_usmap(data = nil_usmap_data, values = "year_enacted", regions = "states") +
-  scale_fill_manual(name = "Year Enacted", values = year_colors, na.value = "lightgray") +
-  labs(title = "NIL Policy Adoption by Year", fill = "Year Enacted", subtitle = "Preliminary visualization: This can be refined down to the month in a timeline format.") +
+# Plot the map with customized color for North Carolina
+plot_usmap(data = nil_usmap_data, values = "year_enacted_override", regions = "states") +
+  scale_fill_manual(
+    name = "Year Enacted", 
+    values = year_colors,
+    na.translate = FALSE 
+  ) +
+  labs(
+    title = "NIL Policy Adoption by Year", 
+    fill = "Year Enacted", 
+    subtitle = "Preliminary visualization"
+  ) +
   theme(panel.background = element_blank())
 
 ```
 
 Notes:
-Proposed but denied is a potential graphic. 
+
+Proposed but denied is a potential graphic.
+
+
 -----------------------
 Admin response: These states played ball. 
 
 ```{r}
 
+nil_usmap_data <- nil_usmap_data |>
+  mutate(
+    employee_response = ifelse(full == "north carolina", "NC", employee_response)
+  )
+
 plot_usmap(data = nil_usmap_data, values = "employee_response", regions = "states") +
-  scale_fill_manual(values = c("Y" = "blue", "N" = "red"), na.value = "lightgray") +
-  labs(title = "These States Played Ball", subtitle = "Visual distribution of states that provided a policy response to our reporters.", fill = "Employee Response") +
-  theme(panel.background = element_blank())
+  scale_fill_manual(
+    values = c("Y" = "blue", "N" = "red"),  
+    na.value = "lightgray"
+  ) +
+  labs(
+    title = "These States Played Ball", 
+    subtitle = "Visual distribution of states that provided a policy response to our reporters.", 
+    fill = "Employee Response"
+  ) +
+  theme(panel.background = element_blank()) +
+  
+  geom_sf(data = subset(nil_usmap_data, full == "north carolina"), fill = "blue", color = NA, show.legend = FALSE)
 
 ```
 Notes:
-North Carolina (private) -- no response
+
 New Mexico -- response received, but didn't "feel comfortable" answering questions.
 
 ------------------------
@@ -172,16 +204,37 @@ Parent/Guardian Involvement and School Notification:
 ```{r}
 
 pg_sn <- nil_usmap_data |>
-  mutate(parent_notification_combo = case_when(
-    parent_guardian == "Y" & notification == "Y" ~ "Y_Y",
-    parent_guardian == "Y" & notification == "N" ~ "Y_N",
-    parent_guardian == "N" & notification == "Y" ~ "N_Y",
-    parent_guardian == "N" & notification == "N" ~ "N_N",
-    TRUE ~ NA_character_  
-  ))
+  mutate(
+    parent_notification_combo = case_when(
+      parent_guardian == "Y" & notification == "Y" ~ "Y_Y",
+      parent_guardian == "Y" & notification == "N" ~ "Y_N",
+      parent_guardian == "N" & notification == "Y" ~ "N_Y",
+      parent_guardian == "N" & notification == "N" ~ "N_N",
+      parent_guardian == "No NIL" ~ "No NIL",   
+      TRUE ~ NA_character_  
+    )
+  )
 
-combo_colors <- c("Y_Y" = "blue", "Y_N" = "purple", "N_Y" = "yellow", "N_N" = "red")
+combo_colors <- c("Y_Y" = "blue", "Y_N" = "purple", "N_Y" = "yellow", "N_N" = "red", "No NIL" = "cyan")
 
+```
+
+```{r}
+
+pg_sn <- nil_usmap_data |>
+  mutate(
+    parent_notification_combo = case_when(
+      parent_guardian == "Y" & notification == "Y" ~ "Y_Y",
+      parent_guardian == "Y" & notification == "N" ~ "Y_N",
+      parent_guardian == "N" & notification == "Y" ~ "N_Y",
+      parent_guardian == "N" & notification == "N" ~ "N_N",
+      parent_guardian == "No NIL" ~ "No NIL",   
+      TRUE ~ "Not Specified"   
+    ),
+    parent_notification_combo = addNA(parent_notification_combo)  
+  )
+
+combo_colors <- c("Y_Y" = "blue", "Y_N" = "purple", "N_Y" = "yellow", "N_N" = "red", "No NIL" = "cyan", "Not Specified" = "lightgray")
 ```
 
 ```{r}
@@ -194,12 +247,16 @@ plot_usmap(data = pg_sn, values = "parent_notification_combo", regions = "states
       "Y_Y" = "Parent/Guardian and School Notif. Required",
       "Y_N" = "Parent/Guardian Required Only",
       "N_Y" = "School Notif. Required Only",
-      "N_N" = "Neither Required"
-    ),
-    na.value = "lightgray"
+      "N_N" = "Neither Required",
+      "No NIL" = "No NIL",
+      "NA" = "Not Specified" 
+    )
   ) +
-  labs(title = "Parent/Guardian and School Notification Requirements for NIL Policies", fill = "Requirement") +
- theme(
+  labs(
+    title = "Parent/Guardian and School Notification Requirements for NIL Policies", 
+    fill = "Requirement"
+  ) +
+  theme(
     panel.background = element_blank(),
     legend.position = "left",               
     legend.justification = "center",       
@@ -207,14 +264,36 @@ plot_usmap(data = pg_sn, values = "parent_notification_combo", regions = "states
     plot.title.position = "plot",          
     plot.title = element_text(hjust = 0)   
   )
+
 ```
 
 Notes:
-Specify which states don't have NIL in the legend.
-- Maryland: Neither are required (red).
+Specify which states don't have NIL in the legend. (Fixed)
 
 ------------------------
 What else do we want to see? What direction do we want to take with our reporting? What changes can we make to the Google Form to continue refining this data?
+
+-------------------------------------------------------
+Updates for 11/11/24 Class:
+
+Feedback from the students on the previous visualizations has been implemented.
+
+- Reporting Ideas: 
+1. Three-Strike States: Pennsylvania, South Carolina, Florida
+
+2. Limited Approval States: Mississippi, Missouri, Arkansas, Nevada
+Mississippi allows it for students committed to any collegiate institution, Missouri and Arkansas allow it for students committed to in-state collegiate institutions and Nevada only allows it for unsanctioned sports.
+
+3. 
+
+
+
+
+
+
+
+
+
 
 
 
