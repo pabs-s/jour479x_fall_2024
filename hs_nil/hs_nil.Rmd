@@ -294,6 +294,7 @@ What I'm working on right now: Creating a separate data frame for violations. I'
 Visualizations:
 
 Map of US States filled in based on the number of prohibited categories
+
 ---------
 Stacked Bar Chart with the Count of Prohibited NIL Policy Categories
 
@@ -305,6 +306,7 @@ proh_cat <- read_csv("https://raw.githubusercontent.com/pabs-s/jour479x_fall_202
 ```
 
 ```{r}
+
 nil_proh <- proh_cat_long |>
   filter(status %in% c("Y", "No NIL", "Not Specified")) |>
   group_by(category, status) %>%
@@ -313,10 +315,6 @@ nil_proh <- proh_cat_long |>
 nil_proh$category <- factor(nil_summary$category, levels = c("adult_ent", "alcohol", "controlled_sub", 
                                                                 "gambling", "prescriptions", "smoke_vape", 
                                                                 "weapons", "other"))
-
-```
-
-```{r}
 
 nil_proh <- proh_cat_long |>
   filter(status %in% c("Y", "No NIL", "Not Specified")) |>
@@ -353,11 +351,90 @@ ggplot(nil_proh, aes(x = category, y = total, fill = status)) +
 ```
 Notes:
 
+```{r}
+perm_cat_long <- perm_cat |>
+  pivot_longer(cols = -state, names_to = "category", values_to = "status")
+
+perm_summary <- perm_cat_long |>
+  filter(status %in% c("Y", "No NIL", "Not Specified", "N")) |>
+  group_by(category, status) |>
+  summarise(total = n(), .groups = 'drop')
+
+perm_summary$category <- factor(perm_summary$category, levels = c("endorsements", "appearances", 
+                                                                  "social_media", "product_promotion", "nfts"))
+
+ggplot(perm_summary, aes(x = category, y = total, fill = status)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Totals for NIL Permitted Categories",
+       x = "Category", y = "Total Count",
+       fill = "Status") +
+  scale_x_discrete(labels = c(
+    "endorsements" = "Endorsements",
+    "appearances" = "Appearances",
+    "social_media" = "Social Media",
+    "product_promotion" = "Product Promotion",
+    "nfts" = "NFTs"
+  )) +
+  scale_fill_manual(
+    values = c("Y" = "red", "No NIL" = "cyan", "Not Specified" = "grey", "N" = "purple"),
+    labels = c("Y" = "Permitted", "No NIL" = "No NIL", "Not Specified" = "Not Specified", 
+              "N" = "Prohibited")
+  ) +
+  scale_y_continuous(breaks = seq(0, 55, by = 5), limits = c(0, 55)) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+```
+Notes:
 
 
 
+```{r}
+#fix(perm_cat)
+```
+
+-------------
+
+Map Visualization of Number of Prohibited Categories by State
 
 
+```{r}
+proh_cat <- proh_cat |>
+  mutate(state = tolower(state))
+
+map_data <- nil_usmap_data |>
+  left_join(proh_cat |> 
+    select(state, catcount), by = c("full" = "state")) 
+
+  map_data <- map_data |>
+  mutate(catcount = factor(catcount),
+  catcount = ifelse(full == "north carolina", 7, catcount),
+         catcount = factor(catcount))
+
+```
+
+```{r}
+
+plot_usmap(data = map_data, values = "catcount", regions = "states") +
+  scale_fill_manual(values = c(
+    "0" = "lightblue",
+    "2" = "skyblue",
+    "3" = "dodgerblue",
+    "4" = "blue",
+    "5" = "navy",
+    "6" = "darkblue",
+    "7" = "purple"
+  ), na.value = "grey80") +
+  labs(title = "Number of Prohibited NIL Categories by U.S. State", fill = "Prohibited\nCategories") +
+  theme(panel.background = element_blank())
+
+```
+Notes: 
+- Need to specify which states have no NIL policies. Also, the students should double-check their states.
+
+
+----------------
+
+Visualization of State Violations (Bar Chart?)
 
 
 
