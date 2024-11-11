@@ -107,7 +107,7 @@ plot_usmap(data = nil_usmap_data, values = "state_policy", include = .south_regi
 
 What does this show us? Why might there be such a high concentration of states in this region that have declined to enact an NIL policy for high schoolers? Also, can we figure out approximately how many high school athletes live in this region that are impacted by these decisions?
 
-Notes:
+Notes: (Fixed)
 
 ---------------
 Years enacted: 
@@ -196,7 +196,7 @@ plot_usmap(data = nil_usmap_data, values = "employee_response", regions = "state
 ```
 Notes:
 
-New Mexico -- response received, but didn't "feel comfortable" answering questions.
+New Mexico -- response received, but didn't "feel comfortable" answering questions. (Fixed)
 
 ------------------------
 Parent/Guardian Involvement and School Notification:
@@ -279,13 +279,20 @@ Updates for 11/11/24 Class:
 Feedback from the students on the previous visualizations has been implemented.
 
 - Reporting Ideas: 
-1. Three-Strike States: Pennsylvania, South Carolina, Florida
+1. Three-Strike States: Pennsylvania (2022), South Carolina (2024), Florida (2024)
 
-2. Limited Approval States: Mississippi, Missouri, Arkansas, Nevada
+2. Limited Approval States: Mississippi (2024), Missouri (2023), Arkansas (2023), Nevada (2022)
 Mississippi allows it for students committed to any collegiate institution, Missouri and Arkansas allow it for students committed to in-state collegiate institutions and Nevada only allows it for unsanctioned sports.
 
 3. 
 
+
+What I'm working on right now. Creating separate data frames for violations and prohibited NIL categories. I've created a data frame for approved NIL categories and will begin visualizing that.
+
+
+```{r}
+
+```
 
 
 
