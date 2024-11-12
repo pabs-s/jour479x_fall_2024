@@ -435,11 +435,13 @@ Notes:
 ----------------
 
 Visualization of State Violations (Bar Chart?)
+Ideas: 
+bar chart for number of states that result in students losing eligibility
 
 
-
-
-
+---------
+Notes: 
+Footnote for "No Language" or "Vague"
 
 
 
