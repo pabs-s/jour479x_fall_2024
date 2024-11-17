@@ -1,0 +1,189 @@
+
+#Presentation 2: NBA Last Two-Minute Report
+
+This presentation focuses on the “NBA Officiating Last Two Minute Reports,” which are publicly accessible tables that share information related to the accuracy of calls made in the last two minutes of each game. Using this information, I'd like to identify the teams and players that have been either the beneficiaries or victims of incorrect officiating decisions. I'd also like to assess (to a degree) the accuracy of NBA referees in these late-game situations when calls have even more impact.
+
+In my background research for this presentation, I found three examples of others who have attempted a similar analysis. The first source, which is from a GitHub user named atlhawksfanatic, offers a dataset formatted for R that is updated through Nov. 8, 2024. Here is the link to the GitHub page (https://github.com/atlhawksfanatic/L2M?tab=readme-ov-file).
+
+As shown below, this data currently contains 83,987 rows and 64 columns. The time range begins on March 1, 2015 and ends on Nov. 8, 2024. It contains references to all 30 NBA teams. Among those 64 columns are data such as period (Q4 and Q5), time of the call, call type, players committing the foul/initiating the call and players disadvantaged in the call. There are also columns for game dates, official names, home and away teams, as well as ID signifiers for officials, games and teams, and scores.   
+
+It's worth noting that there are additional time columns, one for minutes and another for seconds. I can also utilize columns for the network a game is shown on and whether it was shown on national TV. 
+
+
+```{r, echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+
+library(tidyverse)
+library(ggplot2)
+library(ggrepel)
+library(janitor)
+library(lubridate)
+library(ggalt)
+library(cowplot)
+library(dplyr)
+library(scales)
+library(gt)
+library(knitr)
+
+```
+
+```{r}
+
+l2m <- read_csv("l2m.csv")
+colnames(l2m)
+
+```
+
+###Question 1: 
+What are the most common types of incorrect calls?
+
+```{r}
+
+incorrect_calls <- l2m |>
+  filter(decision %in% c("INC", "IC")) |>
+  group_by(call_type) |>
+  summarise(count = n()) |>
+  arrange(desc(count))
+
+top_ten_inc <- incorrect_calls |>
+  slice_head(n = 10)  
+
+ggplot(top_ten_inc, aes(x = reorder(call_type, count), y = count)) +
+  geom_bar(stat = "identity") +
+  coord_flip() +  
+  scale_y_continuous(breaks = seq(0, max(top_ten_inc$count), by = 100)) +
+  labs(
+    title = "Shooting Fouls Spell End of Game Trouble for NBA Refs",
+    x = "Call Type",
+    y = "Count of Incorrect Calls",
+    caption = "Data: atlhawksfanatic (GitHub) | By Pablo Suarez"
+  ) +
+  theme_minimal()
+
+```
+
+In looking at the results of this question, it's clear that NBA referees struggle the most with incorrectly calling shooting fouls in end-of-game scenarios. In fact, four of the top five most incorrectly called plays are fouls, with the only exception being traveling violations.
+
+But I want to contextualize how often these shooting fouls are incorrectly called.
+
+```{r}
+
+shooting_fouls <- l2m |>
+  filter(call_type == "Foul: Shooting")  
+
+shootfoul_count <- shooting_fouls |>
+  group_by(decision) |>        
+  summarise(count = n())
+
+ggplot(shootfoul_count, aes(x = decision, y = count, fill = decision)) +
+  geom_bar(stat = "identity") +
+  labs(
+    title = "NBA Refs Are Overwhelmingly Accurate with Shooting Foul Calls",
+    x = "Decision Type",
+    y = "Count",
+    caption = "Data: atlhawksfanatic (GitHub) | By Pablo Suarez"
+  ) +
+  theme_minimal()
+
+```
+
+When looking at all of the instances of fourth quarter and overtime shooting fouls, it's apparent that NBA referees overwhelmingly call (or don't call) shooting fouls correctly. In fact, of the 21,005 shooting fouls listed in the reports, only roughly 6.6% of them are considered incorrectly called or non-called.
+
+
+```{r}
+
+total_shooting_fouls <- nrow(shooting_fouls)
+
+inc_sf <- shooting_fouls |>
+  filter(decision %in% c("IC", "INC")) |>  
+  nrow()
+
+pct_inc_sf <- (inc_sf / total_shooting_fouls) * 100
+
+cat("Percentage of IC + INC out of total shooting fouls:", pct_inc_sf, "%\n")
+
+```
+
+###Question 2: 
+Who are the players that have been either the beneficiaries or victims of incorrect officiating decisions?
+
+```{r}
+
+inc_ic_calls <- l2m |>
+  filter(decision %in% c("INC", "IC"))  
+
+committing_counts <- inc_ic_calls |>
+  group_by(committing) |>
+  summarise(com_count = n(), .groups = "drop")  
+
+disadvantaged_counts <- inc_ic_calls |>
+  group_by(disadvantaged) |>
+  summarise(dis_count = n(), .groups = "drop")
+
+player_counts <- full_join(
+  committing_counts, disadvantaged_counts,
+  by = c("committing" = "disadvantaged")) |>
+  rename(player = committing) 
+
+player_counts <- player_counts |>
+  mutate(
+    dis_count = replace_na(dis_count, 0),
+    com_count = replace_na(com_count, 0)
+  )
+
+```
+
+```{r}
+
+player_counts <- player_counts |>
+  mutate(total_count = dis_count + com_count)  
+
+top_15_players <- player_counts |>
+  arrange(desc(total_count)) |>
+  slice_head(n = 15)
+
+if (any(is.na(top_15_players$player))) {
+  next_highest_player <- player_counts |>
+    filter(!player %in% top_15_players$player) |> 
+    arrange(desc(total_count)) |>
+    slice_head(n = 1)  
+  
+  top_15_players <- top_15_players |>
+    mutate(player = ifelse(is.na(player), next_highest_player$player, player))
+}
+```
+
+```{r}
+
+ggplot(top_15_players, aes(x = dis_count, xend = com_count, y = reorder(player, total_count))) +
+  geom_dumbbell(
+    colour = "grey", 
+    size = 2,         
+    dot_guide = TRUE, 
+    dot_guide_size = 0.5
+  ) +
+  geom_point(aes(x = dis_count), color = "blue", size = 3) +  
+  geom_point(aes(x = com_count), color = "red", size = 3) +   
+  labs(
+    title = "Top 15 Players: Disadvantaged vs. Committing Counts",
+    x = "Count",
+    y = "Player",
+    caption = "Blue = Disadvantaged, Red = Committing"
+  ) +
+  theme_minimal()
+
+```
+
+Above is a list of the 15 players with the highest combined counts of disadvantaged and committed calls. Al Horford, one of the longest standing NBA veterans, is very much an outlier regarding how involved he is in these calls. What's also interesting is that roughly half of these players are considered centers or power forwards (a.k.a., big men). This might be because there position on the court would make them susceptible to contact.
+
+Further Analysis:
+- Who are the teams that have been either the beneficiaries or victims of incorrect officiating decisions?
+- Do games on national TV lead to more or less accurate calls at the end of games?
+- Which officials have the highest amount of incorrect calls? Additionally, what's the percentage of incorrect calls made by these officials?
+- Incorrect calls by year.
+- Number of incorrect calls in 4Q vs OT.
+
+
+
+
+
+
