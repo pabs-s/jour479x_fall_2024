@@ -175,6 +175,8 @@ ggplot(top_15_players, aes(x = dis_count, xend = com_count, y = reorder(player, 
 
 Above is a list of the 15 players with the highest combined counts of disadvantaged and committed calls. Al Horford, one of the longest standing NBA veterans, is very much an outlier regarding how involved he is in these calls. What's also interesting is that roughly half of these players are considered centers or power forwards (a.k.a., big men). This might be because there position on the court would make them susceptible to contact.
 
+(What this doesn't necessarily indicate is how punishing these missed calls are for these players. I'm not sure how to go about identifying that at the moment.)
+
 Further Analysis:
 - Who are the teams that have been either the beneficiaries or victims of incorrect officiating decisions?
 - Do games on national TV lead to more or less accurate calls at the end of games?
