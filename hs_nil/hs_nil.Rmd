@@ -13,6 +13,7 @@ library(dplyr)
 library(viridis)
 library(scales)
 library(gt)
+library(ggrepel)
 
 ```
 
@@ -553,15 +554,22 @@ pby_10 |>
     columns = everything())
 
 ```
+Notes:
+
+
+
 
 ```{r}
 ggplot(data = pby_10, aes(x = Year)) + 
   geom_line(aes(y = Total, color = "Total"), size = 1) +
   scale_color_manual(
     values = c("Total" = "darkgreen")) +
-  scale_y_continuous(labels = comma) +  
+  scale_y_continuous(labels = scales::comma) +  
+  scale_x_continuous(
+    breaks = seq(min(pby_10$Year), max(pby_10$Year), by = 2)
+  ) +
   labs(
-    title = "High School Sports Participation Since 2012",
+    title = "High School Sports Participation Reaches Historical Peak Post-Pandemic",
     x = "Year",
     y = "Participants",
     caption = "Data: NFHS",
@@ -569,8 +577,6 @@ ggplot(data = pby_10, aes(x = Year)) +
   ) +
   theme_minimal()
 ```
-
-
 
 Notes:
 
@@ -595,15 +601,20 @@ sport_part_long <- sport_part |>
 
 ggplot(sport_part_long, aes(x = sport, y = Participants, fill = Gender)) +
   geom_bar(stat = "identity", position = "dodge") +
+  scale_fill_manual(
+    values = c("boys" = "blue", "girls" = "pink")  
+  ) +
   scale_y_continuous(labels = scales::comma) +
   labs(
     title = "High School Sports Participation by Sport and Gender",
     x = "Sport",
     y = "Participants",
-    fill = "Gender") +
+    fill = "Gender"
+  ) +
   theme_minimal() +
   theme(
-    axis.text.x = element_text(angle = 45, hjust = 1))
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )
 
 ```
 
@@ -617,13 +628,14 @@ sport_part_gt <- sport_part |>
   mutate(
     boys = as.numeric(gsub(",", "", boys)),
     girls = as.numeric(gsub(",", "", girls)),
-    total = as.numeric(gsub(",", "", total)))
+    total = as.numeric(gsub(",", "", total))) |>
+  arrange(desc(total))
 
 sport_part_gt |>
   gt() |>
   tab_header(
     title = "High School Sports Participation by Sport",
-    subtitle = "Boys, Girls, and Total Participants") |>
+    subtitle = "Boys, girls and total participants from programs reported by at least 40 states.") |>
   fmt_number(
     columns = c(boys, girls, total),
     decimals = 0) |>
@@ -649,8 +661,85 @@ Notes:
 
 ------------
 
+Visualization #4: Comparison between boys and girls schools and sports.
+
+```{r}
+#code for creating a csv from pdf data
+
+#boys <- tribble(
+#  ~Sport, ~Schools, ~Participants,
+#  "Basketball", 18587, 536668,
+#  "Track and Field – Outdoor", 17274, 625333,
+#  "Baseball", 16146, 471701,
+#  "Cross Country", 15511, 239381,
+#  "Golf", 14055, 155174,
+#  "Football – 11-Player", 13788, 1031508,
+#  "Soccer", 12754, 467483,
+#  "Wrestling", 11149, 291874,
+#  "Tennis", 10175, 157835,
+#  "Swimming & Diving", 7855, 116799)
+
+#girls <- tribble(
+#  ~Sport, ~Schools, ~Participants,
+#  "Basketball", 18090, 367284,
+#  "Track and Field – Outdoor", 17267, 506015,
+#  "Volleyball", 16849, 479125,
+#  "Softball – Fast Pitch", 15635, 345451,
+#  "Cross Country", 15228, 192969,
+# "Soccer", 12307, 383895,
+#  "Golf", 11089, 138174,
+#  "Tennis", 10645, 195766,
+#  "Swimming & Diving", 8133, 138174,
+#  "Competitive Spirit", 7827, 101204)
+
+#boys <- boys |> mutate(Gender = "Boys")
+#girls <- girls |> mutate(Gender = "Girls")
+
+#combined <- bind_rows(boys, girls)
+
+#write_csv(combined, "top_sports_schools.csv")
+
+sports_and_schools <- read_csv("https://raw.githubusercontent.com/pabs-s/jour479x_fall_2024/refs/heads/main/hs_nil/top_sports_schools.csv")
+
+```
+
+```{r}
+
+ggplot(sports_and_schools, aes(
+  x = Schools,
+  y = Participants,
+  size = Participants,
+  label = Sport,
+  color = Gender
+)) +
+  geom_point(alpha = 0.6) +  
+  geom_text_repel(size = 3, max.overlaps = 10) +  
+  scale_size_continuous(range = c(3, 15)) +  
+  scale_color_manual(values = c("blue", "pink")) +  
+  labs(
+    title = "High School Sports Participation by Sport and Gender",
+    x = "Number of Schools Offering the Sport",
+    y = "Number of Participants",
+    size = "Participants",
+    color = "Gender",
+    caption = "Data: NFHS"
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "right",  
+    legend.key.size = unit(1.5, "lines"),  
+    plot.margin = margin(t = 10, r = 30, b = 10, l = 10)  
+  )
 
 
+
+```
+
+Notes:
+
+
+
+--------
 
 
 
