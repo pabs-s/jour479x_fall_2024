@@ -10,6 +10,9 @@ library(readr)
 library(usmap)
 library(maps)
 library(dplyr)
+library(viridis)
+library(scales)
+library(gt)
 
 ```
 
@@ -471,18 +474,91 @@ tot_hs <- tot_hs |>
   select(state, Total)
 
 plot_usmap(data = tot_hs, values = "Total", regions = "states") +
-  scale_fill_continuous(
-    low = "lightblue", high = "darkblue", 
-    name = "Total Athletes", label = scales::comma
+  scale_fill_viridis(
+    option = "magma",  # Other options: "plasma," "viridis", "magma", "cividis"
+    name = "Total Athletes",
+    label = scales::comma
   ) +
   theme_minimal() +
-  labs(title = "Total High School Athletes by State (2023-24)",
-       subtitle = "Data includes boys and girls participation rates",
-       caption: "Data: NFHS")
+  labs(
+    title = "Total High School Athletes by State (2023-24)",
+    subtitle = "Data includes boys and girls participation rates",
+     caption = "Data: NFHS")
 
 ```
 
+Notes:
 
 
+---------
+
+Visualization #2: High School Athlete Participation by Year
+
+```{r}
+
+part_by_year <- read_csv("https://raw.githubusercontent.com/pabs-s/jour479x_fall_2024/refs/heads/main/hs_nil/hs_part_year.csv")
+
+pby_15 <- tail(part_by_year, 15)
+
+ggplot(data = part_by_year, aes(x = Year)) + 
+  geom_line(aes(y = Total, color = "Total"), size = 1) +
+  geom_line(aes(y = `Boys Participants`, color = "Boys"), size = 1) +
+  geom_line(aes(y = `Girls Participants`, color = "Girls"), size = 1) +
+  scale_color_manual(
+    values = c("Total" = "darkgreen", "Boys" = "blue", "Girls" = "pink")
+  ) +
+  scale_y_continuous(labels = comma) +  
+  labs(
+    title = "High School Sports Participation Since 1971",
+    subtitle = "Post-Covid jump in participation, coupled with high school NIL",
+    x = "Year",
+    y = "Participants",
+    caption = "Data: NFHS",
+    color = "Legend"
+  ) +
+  theme_minimal()
+
+```
+Notes:
+
+
+
+```{r}
+
+pby_10 <- pby_15 |>
+  arrange(Year) |>  
+  slice(-1:-5) |>
+  arrange(desc(Year))
+ 
+pby_10 |> 
+  gt() |>
+  tab_header(
+    title = "High School Sports Participation (Last 10 Years)",
+    subtitle = "Comparison of boys, girls and total participants") |>
+  fmt_number(
+    columns = vars(`Boys Participants`, `Girls Participants`, Total),
+    decimals = 0) |>
+  cols_label(
+    Year = "Year",
+    `Boys Participants` = "Boys",
+    `Girls Participants` = "Girls",
+    Total = "Total") |>
+  tab_style(
+    style = cell_text(weight = "bold"),
+    locations = cells_column_labels(everything())) |>
+  tab_source_note(
+    source_note = "Data Source: NFHS") |>
+  cols_align(
+    align = "center",
+    columns = everything())
+
+```
+
+Notes:
+
+
+--------
+Visualization #3: Participation by Sport
+The sports pulled from the survey are ones that are accounted for in at least 40 states. I did not include male figures for softball or female figures for baseball as they did not meet the 40 state reporting threshold.
 
 
