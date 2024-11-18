@@ -451,6 +451,7 @@ First off, here's an interesting finding from my research this week:
 Virginia's VHSL has a free NIL Policy Digital Course. 
 The description: "The purpose of the VHSL NIL Policy digital course is to help students and their families to understand Name, Image, and Likeness. The course includes 8 video chapters – and downloadable content – that last 30 minutes in total." 
 Link: https://www.vhsl.org/vhsl-nil-policy-digital-course/ 
+
 Do any other states offer this level of education for their high school NIL policies? Might be worth looking into. Also, whoever has Virginia might want to enroll to let us know what insights we can glean from this.
 
 This week I'm visualizing the potential impact of these high school policies based on data provided by the National Federation of State High School Associations, an advocacy nonprofit for high school athletics. For the purposes of this week's update, I'm using the numbers shown in the organization's 2023-2024 High School Athletics Participation Survey, which shows the number of high school athletes across all 50 states and Washington, D.C., by year, sport and gender.
@@ -458,6 +459,28 @@ This week I'm visualizing the potential impact of these high school policies bas
 Here's a link to the survey archives: https://www.nfhs.org/sports-resource-content/high-school-participation-survey-archive/
 
 Here's a link to the most recent survey that I'm using:  https://www.nfhs.org/media/7213111/2023-24-nfhs-participation-survey-full.pdf
+
+Visualization #1: High School Participation by State for 2023-2024
+
+```{r}
+
+tot_hs <- read_csv("https://raw.githubusercontent.com/pabs-s/jour479x_fall_2024/refs/heads/main/hs_nil/tot_hs_participation.csv")
+
+tot_hs <- tot_hs |>
+  mutate(state = tolower(State)) |> 
+  select(state, Total)
+
+plot_usmap(data = tot_hs, values = "Total", regions = "states") +
+  scale_fill_continuous(
+    low = "lightblue", high = "darkblue", 
+    name = "Total Athletes", label = scales::comma
+  ) +
+  theme_minimal() +
+  labs(title = "Total High School Athletes by State (2023-24)",
+       subtitle = "Data includes boys and girls participation rates",
+       caption: "Data: NFHS")
+
+```
 
 
 
