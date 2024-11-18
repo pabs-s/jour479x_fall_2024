@@ -447,6 +447,7 @@ bar chart for number of states that result in students losing eligibility
 ---------
 Notes: 
 Footnote for "No Language" or "Vague"
+
 ---------------------------------------
 ### 11/18/24 Class Update:
 
@@ -524,12 +525,11 @@ Notes:
 
 
 ```{r}
-
 pby_10 <- pby_15 |>
   arrange(Year) |>  
   slice(-1:-5) |>
   arrange(desc(Year))
- 
+
 pby_10 |> 
   gt() |>
   tab_header(
@@ -553,6 +553,24 @@ pby_10 |>
     columns = everything())
 
 ```
+
+```{r}
+ggplot(data = pby_10, aes(x = Year)) + 
+  geom_line(aes(y = Total, color = "Total"), size = 1) +
+  scale_color_manual(
+    values = c("Total" = "darkgreen")) +
+  scale_y_continuous(labels = comma) +  
+  labs(
+    title = "High School Sports Participation Since 2012",
+    x = "Year",
+    y = "Participants",
+    caption = "Data: NFHS",
+    color = "Legend"
+  ) +
+  theme_minimal()
+```
+
+
 
 Notes:
 
