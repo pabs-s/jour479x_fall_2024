@@ -1,3 +1,6 @@
+
+This markdown file contains visualization work related to the JOUR328G High School NIL Policy Reporting Project.
+
 ```{r}
 
 library(tidyverse)
@@ -274,7 +277,7 @@ Specify which states don't have NIL in the legend. (Fixed)
 What else do we want to see? What direction do we want to take with our reporting? What changes can we make to the Google Form to continue refining this data?
 
 -------------------------------------------------------
-Updates for 11/11/24 Class:
+###Updates for 11/11/24 Class:
 
 Feedback from the students on the previous visualizations has been implemented.
 
@@ -298,6 +301,7 @@ Map of US States filled in based on the number of prohibited categories
 ---------
 Stacked Bar Chart with the Count of Prohibited NIL Policy Categories
 
+*DON'T USE THIS VISUALIZATION. KEEPING IN DOC FOR SHOWING WORK
 ```{r}
 
 perm_cat <- read_csv("https://raw.githubusercontent.com/pabs-s/jour479x_fall_2024/refs/heads/main/hs_nil/nil_permitted_categories.csv")
@@ -307,86 +311,85 @@ proh_cat <- read_csv("https://raw.githubusercontent.com/pabs-s/jour479x_fall_202
 
 ```{r}
 
-nil_proh <- proh_cat_long |>
-  filter(status %in% c("Y", "No NIL", "Not Specified")) |>
-  group_by(category, status) %>%
-  summarise(total = n(), .groups = 'drop')
+#nil_proh <- proh_cat_long |>
+#  filter(status %in% c("Y", "No NIL", "Not Specified")) |>
+#  group_by(category, status) %>%
+#  summarise(total = n(), .groups = 'drop')
 
-nil_proh$category <- factor(nil_summary$category, levels = c("adult_ent", "alcohol", "controlled_sub", 
-                                                                "gambling", "prescriptions", "smoke_vape", 
-                                                                "weapons", "other"))
+#nil_proh$category <- factor(nil_summary$category, levels = c("adult_ent", "alcohol", "controlled_sub", 
+                                                             #   "gambling", "prescriptions", "smoke_vape", 
+                                                             #   "weapons", "other"))
 
-nil_proh <- proh_cat_long |>
-  filter(status %in% c("Y", "No NIL", "Not Specified")) |>
-  group_by(category, status) %>%
-  summarise(total = n(), .groups = 'drop')
+#nil_proh <- proh_cat_long |>
+#  filter(status %in% c("Y", "No NIL", "Not Specified")) |>
+#  group_by(category, status) %>%
+#  summarise(total = n(), .groups = 'drop')
 
 
-nil_proh$category <- factor(nil_proh$category, levels = c("adult_ent", "alcohol", "controlled_sub", 
-                                                                "gambling", "prescriptions", "smoke_vape", 
-                                                                "weapons", "other"))
+# nil_proh$category <- factor(nil_proh$category, levels = c("adult_ent", "alcohol", "controlled_sub", 
+                                                              #  "gambling", "prescriptions", "smoke_vape", 
+                                                              #  "weapons", "other"))
 
-ggplot(nil_proh, aes(x = category, y = total, fill = status)) +
-  geom_bar(stat = "identity") +
-  labs(title = "Totals for NIL Prohibited Categories",
-       x = "Category", y = "Total Count",
-       fill = "Status") +
-  scale_x_discrete(labels = c(
-    "adult_ent" = "Adult Ent.",
-    "alcohol" = "Alcohol",
-    "controlled_sub" = "Controlled Sub.",
-    "gambling" = "Gambling",
-    "prescriptions" = "Prescriptions",
-    "smoke_vape" = "Smoke-related",
-    "weapons" = "Weapons",
-    "other" = "Other"
-  )) +
-  scale_fill_manual(
-    values = c("Y" = "red", "No NIL" = "cyan", "Not Specified" = "grey"),
-    labels = c("Y" = "Prohibited", "No NIL" = "No NIL", "Not Specified" = "Not Specified")
-  ) +
-  scale_y_continuous(breaks = seq(0, 55, by = 5), limits = c(0, 55)) +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+#ggplot(nil_proh, aes(x = category, y = total, fill = status)) +
+#  geom_bar(stat = "identity") +
+#  labs(title = "Totals for NIL Prohibited Categories",
+#       x = "Category", y = "Total Count",
+#       fill = "Status") +
+#  scale_x_discrete(labels = c(
+#    "adult_ent" = "Adult Ent.",
+#    "alcohol" = "Alcohol",
+#    "controlled_sub" = "Controlled Sub.",
+#    "gambling" = "Gambling",
+#    "prescriptions" = "Prescriptions",
+#    "smoke_vape" = "Smoke-related",
+#    "weapons" = "Weapons",
+#    "other" = "Other"
+#  )) +
+#  scale_fill_manual(
+#    values = c("Y" = "red", "No NIL" = "cyan", "Not Specified" = "grey"),
+#    labels = c("Y" = "Prohibited", "No NIL" = "No NIL", "Not Specified" = "Not Specified")
+#  ) +
+#  scale_y_continuous(breaks = seq(0, 55, by = 5), limits = c(0, 55)) +
+#  theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
 ```
 Notes:
+-----
 
+*DON'T USE THIS VISUALIZATION. KEEPING IN DOC FOR SHOWING WORK
 ```{r}
-perm_cat_long <- perm_cat |>
-  pivot_longer(cols = -state, names_to = "category", values_to = "status")
+#perm_cat_long <- perm_cat |>
+#  pivot_longer(cols = -state, names_to = "category", values_to = "status")
 
-perm_summary <- perm_cat_long |>
-  filter(status %in% c("Y", "No NIL", "Not Specified", "N")) |>
-  group_by(category, status) |>
-  summarise(total = n(), .groups = 'drop')
+#perm_summary <- perm_cat_long |>
+#  filter(status %in% c("Y", "No NIL", "Not Specified", "N")) |>
+#  group_by(category, status) |>
+ # summarise(total = n(), .groups = 'drop')
 
-perm_summary$category <- factor(perm_summary$category, levels = c("endorsements", "appearances", 
-                                                                  "social_media", "product_promotion", "nfts"))
+#perm_summary$category <- factor(perm_summary$category, levels = c("endorsements", "appearances", 
+                                                                 # "social_media", "product_promotion", "nfts"))
 
-ggplot(perm_summary, aes(x = category, y = total, fill = status)) +
-  geom_bar(stat = "identity") +
-  labs(title = "Totals for NIL Permitted Categories",
-       x = "Category", y = "Total Count",
-       fill = "Status") +
-  scale_x_discrete(labels = c(
-    "endorsements" = "Endorsements",
-    "appearances" = "Appearances",
-    "social_media" = "Social Media",
-    "product_promotion" = "Product Promotion",
-    "nfts" = "NFTs"
-  )) +
-  scale_fill_manual(
-    values = c("Y" = "red", "No NIL" = "cyan", "Not Specified" = "grey", "N" = "purple"),
-    labels = c("Y" = "Permitted", "No NIL" = "No NIL", "Not Specified" = "Not Specified", 
-              "N" = "Prohibited")
-  ) +
-  scale_y_continuous(breaks = seq(0, 55, by = 5), limits = c(0, 55)) +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+# ggplot(perm_summary, aes(x = category, y = total, fill = status)) +
+#  geom_bar(stat = "identity") +
+#  labs(title = "Totals for NIL Permitted Categories",
+#       x = "Category", y = "Total Count",
+#       fill = "Status") +
+#  scale_x_discrete(labels = c(
+#    "endorsements" = "Endorsements",
+#    "appearances" = "Appearances",
+#    "social_media" = "Social Media",
+#    "product_promotion" = "Product Promotion",
+#    "nfts" = "NFTs"
+#  )) +
+#  scale_fill_manual(
+ #   values = c("Y" = "red", "No NIL" = "cyan", "Not Specified" = "grey", "N" = "purple"),
+ #   labels = c("Y" = "Permitted", "No NIL" = "No NIL", "Not Specified" = "Not Specified", 
+#              "N" = "Prohibited")
+#  ) +
+#  scale_y_continuous(breaks = seq(0, 55, by = 5), limits = c(0, 55)) +
+#  theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
 ```
-Notes:
-
-
 
 ```{r}
 #fix(perm_cat)
@@ -394,21 +397,22 @@ Notes:
 
 -------------
 
+*DON'T USE THIS VISUALIZATION. KEEPING IN DOC FOR SHOWING WORK
 Map Visualization of Number of Prohibited Categories by State
 
 
 ```{r}
-proh_cat <- proh_cat |>
-  mutate(state = tolower(state))
+#proh_cat <- proh_cat |>
+#  mutate(state = tolower(state))
 
-map_data <- nil_usmap_data |>
-  left_join(proh_cat |> 
-    select(state, catcount), by = c("full" = "state")) 
+#map_data <- nil_usmap_data |>
+#  left_join(proh_cat |> 
+#    select(state, catcount), by = c("full" = "state")) 
 
-  map_data <- map_data |>
-  mutate(catcount = factor(catcount),
-  catcount = ifelse(full == "north carolina", 7, catcount),
-         catcount = factor(catcount))
+#  map_data <- map_data |>
+#  mutate(catcount = factor(catcount),
+#  catcount = ifelse(full == "north carolina", 7, catcount),
+#         catcount = factor(catcount))
 
 ```
 
@@ -431,17 +435,29 @@ plot_usmap(data = map_data, values = "catcount", regions = "states") +
 Notes: 
 - Need to specify which states have no NIL policies. Also, the students should double-check their states.
 
-
 ----------------
 
 Visualization of State Violations (Bar Chart?)
 Ideas: 
 bar chart for number of states that result in students losing eligibility
 
-
 ---------
 Notes: 
 Footnote for "No Language" or "Vague"
+---------------------------------------
+### 11/18/24 Class Update:
+
+First off, here's an interesting finding from my research this week:
+Virginia's VHSL has a free NIL Policy Digital Course. 
+The description: "The purpose of the VHSL NIL Policy digital course is to help students and their families to understand Name, Image, and Likeness. The course includes 8 video chapters – and downloadable content – that last 30 minutes in total." 
+Link: https://www.vhsl.org/vhsl-nil-policy-digital-course/ 
+Do any other states offer this level of education for their high school NIL policies? Might be worth looking into. Also, whoever has Virginia might want to enroll to let us know what insights we can glean from this.
+
+This week I'm visualizing the potential impact of these high school policies based on data provided by the National Federation of State High School Associations, an advocacy nonprofit for high school athletics. For the purposes of this week's update, I'm using the numbers shown in the organization's 2023-2024 High School Athletics Participation Survey, which shows the number of high school athletes across all 50 states and Washington, D.C., by year, sport and gender.
+
+Here's a link to the survey archives: https://www.nfhs.org/sports-resource-content/high-school-participation-survey-archive/
+
+Here's a link to the most recent survey that I'm using:  https://www.nfhs.org/media/7213111/2023-24-nfhs-participation-survey-full.pdf
 
 
 
