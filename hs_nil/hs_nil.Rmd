@@ -561,4 +561,78 @@ Notes:
 Visualization #3: Participation by Sport
 The sports pulled from the survey are ones that are accounted for in at least 40 states. I did not include male figures for softball or female figures for baseball as they did not meet the 40 state reporting threshold.
 
+```{r}
+
+sport_part <- read_csv("https://raw.githubusercontent.com/pabs-s/jour479x_fall_2024/refs/heads/main/hs_nil/part_by_sport.csv")
+
+```
+```{r}
+
+sport_part_long <- sport_part |>
+  pivot_longer(
+    cols = c(boys, girls),  
+    names_to = "Gender",
+    values_to = "Participants") |>
+  mutate(Participants = as.numeric(gsub(",", "", Participants))) 
+
+ggplot(sport_part_long, aes(x = sport, y = Participants, fill = Gender)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  scale_y_continuous(labels = scales::comma) +
+  labs(
+    title = "High School Sports Participation by Sport and Gender",
+    x = "Sport",
+    y = "Participants",
+    fill = "Gender") +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+Notes:
+How can we add context for this chart through reporting (i.e., Do we have a sense for the distribution of HS NIL deals by sport?)
+
+Here's the same info in a table format:
+```{r}
+
+sport_part_gt <- sport_part |>
+  mutate(
+    boys = as.numeric(gsub(",", "", boys)),
+    girls = as.numeric(gsub(",", "", girls)),
+    total = as.numeric(gsub(",", "", total)))
+
+sport_part_gt |>
+  gt() |>
+  tab_header(
+    title = "High School Sports Participation by Sport",
+    subtitle = "Boys, Girls, and Total Participants") |>
+  fmt_number(
+    columns = c(boys, girls, total),
+    decimals = 0) |>
+  cols_label(
+    sport = "Sport",
+    boys = "Boys",
+    girls = "Girls",
+    total = "Total") |>
+  tab_style(
+    style = cell_text(weight = "bold"),
+    locations = cells_column_labels(everything())) |>
+  cols_align(
+    align = "center",
+    columns = everything()) |>
+  tab_source_note(
+    source_note = "Data Source: NFHS")
+
+```
+
+Notes:
+
+
+
+------------
+
+
+
+
+
 
