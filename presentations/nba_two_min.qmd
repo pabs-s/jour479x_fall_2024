@@ -28,7 +28,7 @@ library(knitr)
 
 ```{r}
 
-l2m <- read_csv("l2m.csv")
+l2m <- read_csv("https://raw.githubusercontent.com/pabs-s/jour479x_fall_2024/refs/heads/main/presentations/l2m.csv")
 colnames(l2m)
 
 ```

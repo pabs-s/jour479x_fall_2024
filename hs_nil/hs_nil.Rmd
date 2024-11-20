@@ -490,6 +490,7 @@ plot_usmap(data = tot_hs, values = "Total", regions = "states") +
 ```
 
 Notes:
+Flip the colors, also let's fix the gradient for better contrast.
 
 
 ---------
@@ -522,7 +523,7 @@ ggplot(data = part_by_year, aes(x = Year)) +
 
 ```
 Notes:
-
+Is participation skewed by mandatory participation among associations?
 
 
 ```{r}
@@ -740,6 +741,35 @@ Notes:
 
 
 --------
+Little League Story:
+- Participation data
+
+Motion Graphic:
+- 
+
+Overview Story:
+- Broad view of HS NIL policies across the country. 
+
+Sponsorship Story:
+
+
+Transfers:
+
+
+Youngest NIL Athletes/TKD
+
+NIL Contrarians:
+- Viewpoints arguing against implementation of NIL policies for HS athletes. 
+
+Collectives:
+- YOKE: Software service that partners with Louisiana, a school can set up an NIL club where people on the team can sign up and produce content for money. 
+
+Final Thoughts:
+- Map of known HS NIL companies across the country (Cooper)
+
+
+
+
 
 
 
