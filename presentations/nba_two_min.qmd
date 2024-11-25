@@ -33,8 +33,8 @@ colnames(l2m)
 
 ```
 
-###Question 1: 
-What are the most common types of incorrect calls?
+###Question 1: What are the most common types of incorrect calls? 
+Subcategories for this question include the accuracy of shooting fouls and percentage of overall incorrect calls in the dataframe. 
 
 ```{r}
 
@@ -55,8 +55,7 @@ ggplot(top_ten_inc, aes(x = reorder(call_type, count), y = count)) +
     title = "Shooting Fouls Spell End of Game Trouble for NBA Refs",
     x = "Call Type",
     y = "Count of Incorrect Calls",
-    caption = "Data: atlhawksfanatic (GitHub) | By Pablo Suarez"
-  ) +
+    caption = "Data: atlhawksfanatic (GitHub) | By Pablo Suarez") +
   theme_minimal()
 
 ```
@@ -103,6 +102,19 @@ cat("Percentage of IC + INC out of total shooting fouls:", pct_inc_sf, "%\n")
 
 ```
 
+Now, let's see the overall percentage of incorrect calls throughout the entire L2M dataframe.
+
+```{r}
+
+sum(incorrect_calls$count, na.rm = TRUE) #5912
+#83,987
+
+(5912/83987) * 100 
+
+```
+
+The result is that in last 2-minute situations NBA referees get roughly 7% of calls incorrect. That is a good number to keep in mind moving through the rest of this analysis.
+
 ###Question 2: 
 Who are the players that have been either the beneficiaries or victims of incorrect officiating decisions?
 
@@ -127,29 +139,21 @@ player_counts <- full_join(
 player_counts <- player_counts |>
   mutate(
     dis_count = replace_na(dis_count, 0),
-    com_count = replace_na(com_count, 0)
-  )
+    com_count = replace_na(com_count, 0))
 
 ```
 
 ```{r}
 
 player_counts <- player_counts |>
-  mutate(total_count = dis_count + com_count)  
+  mutate(total_count = dis_count + com_count) |>
+  arrange(desc(total_count))
 
 top_15_players <- player_counts |>
-  arrange(desc(total_count)) |>
-  slice_head(n = 15)
+  filter(!is.na(player)) |> 
+  arrange(desc(total_count)) |> 
+  slice(1:15)
 
-if (any(is.na(top_15_players$player))) {
-  next_highest_player <- player_counts |>
-    filter(!player %in% top_15_players$player) |> 
-    arrange(desc(total_count)) |>
-    slice_head(n = 1)  
-  
-  top_15_players <- top_15_players |>
-    mutate(player = ifelse(is.na(player), next_highest_player$player, player))
-}
 ```
 
 ```{r}
@@ -159,31 +163,210 @@ ggplot(top_15_players, aes(x = dis_count, xend = com_count, y = reorder(player, 
     colour = "grey", 
     size = 2,         
     dot_guide = TRUE, 
-    dot_guide_size = 0.5
-  ) +
+    dot_guide_size = 0.5) +
   geom_point(aes(x = dis_count), color = "blue", size = 3) +  
   geom_point(aes(x = com_count), color = "red", size = 3) +   
   labs(
     title = "Top 15 Players: Disadvantaged vs. Committing Counts",
-    x = "Count",
+    subtitle = "Involvement in incorrect calls and no calls in NBA L2M report.",
+    x = "Number of Plays",
     y = "Player",
-    caption = "Blue = Disadvantaged, Red = Committing"
-  ) +
+    caption = "Blue = Disadvantaged, Red = Committing | Data: atlhawksfanatic (GitHub) | By Pablo Suarez") +
   theme_minimal()
 
 ```
 
-Above is a list of the 15 players with the highest combined counts of disadvantaged and committed calls. Al Horford, one of the longest standing NBA veterans, is very much an outlier regarding how involved he is in these calls. What's also interesting is that roughly half of these players are considered centers or power forwards (a.k.a., big men). This might be because there position on the court would make them susceptible to contact.
+Above is a list of the 15 players with the highest combined counts of disadvantaged and committed calls. A previous version of this chart showed that Al Horford, one of the longest standing NBA veterans, was very much an outlier regarding how involved he is in these calls. After further review, it turns out that an error in my code resulted in his figures being miscounted. I knew this also had to be a mistake because of the disparity with other long-tenured players in the graphic: LeBron James (22 years), Kyle Lowry (19 years), Paul George (14 years) and Russell Westbrook (17 years).
 
-(What this doesn't necessarily indicate is how punishing these missed calls are for these players. I'm not sure how to go about identifying that at the moment.)
+After fixing the graphic, Nikola Jokic leads all NBA players for references in plays with incorrect calls and no calls with a count of 117. He's also the only player in the top 8 that has been the disadvantaged player more than the committing player.
+
+Conversely, players like Horford, Draymond Green, Karl-Anthony Towns are major offenders in terms of having high disparity between the instances where they are disadvantaged compared to committing fouls or turnovers.
+
+Roughly half of these players are considered centers or power forwards (a.k.a., big men). This might be because there position on the court would make them susceptible to contact. The players who would be considered exceptions to this rule, like James Harden, Westbrook and Jimmy Butler, have also made a living by frequently getting into the paint for layups. 
+
+Looking more into Nikola Jokic, I isolated the 2-minute report data to only show instances where he was referenced, which resulted in 1,562 plays. Filtering that data even further, I pulled all of the plays involving Jokic where the call was either incorrectly called or not called. That narrowed the dataframe down to 117 plays. That means that out of all of the last 2-minute report plays involving Jokic, roughly 7.5% of them ended with an incorrect call by the officials. 
+
+```{r}
+# code for checking horford disparity 
+# horford <- l2m |> filter(disadvantaged == "Al Horford" | committing == "Al Horford")
+# horford |> filter(decision %in% c("INC", "IC")) |> group_by(committing) |> summarise(com_count = n(), .groups = "drop")
+# horford |> filter(decision %in% c("INC", "IC")) |> group_by(disadvantaged) |> summarise(com_count = n(), .groups = "drop")
+
+jokic <- l2m |> filter(disadvantaged == "Nikola Jokic" | committing == "Nikola Jokic")
+jokic_inc_calls <- jokic |> filter(decision %in% c("INC", "IC")) 
+
+```
+
+The next codeblock helps create a distribution of 117 incorrect calls Jokic is involved in. 
+
+```{r}
+
+jokic_count <- jokic_inc_calls |>
+  group_by(call_type, decision) |>
+  summarise(count = n(), .groups = "drop") |>
+  arrange(desc(count))
+
+jokic1 <- ggplot(jokic_count, aes(x = call_type, y = count, fill = decision)) +
+  geom_bar(stat = "identity") +
+  scale_fill_manual(
+    values = c("INC" = "blue", "IC" = "red")) +
+  labs(
+    title = "Jokic Gets a Good Whistle with Offensive Fouls",
+    x = "Call Type",
+    y = "Count",
+    fill = "Decision",
+    caption = "Data: atlhawksfanatic (GitHub) | By Pablo Suarez") +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    plot.margin = margin(10, 10, 10, 30))
+
+
+```
+
+So what about a distribution of his committing versus disadvantaged fouls?
+
+```{r}
+
+jokic_call_summary <- jokic_inc_calls |>
+  filter(committing == "Nikola Jokic" | disadvantaged == "Nikola Jokic") |> 
+  mutate(role = case_when(
+    committing == "Nikola Jokic" ~ "Committing",
+    disadvantaged == "Nikola Jokic" ~ "Disadvantaged")) |> 
+  group_by(call_type, role) |> 
+  summarise(count = n()) |>
+  arrange(desc(count))
+
+jokic2 <- ggplot(jokic_call_summary, aes(x = call_type, y = count, fill = role)) +
+  geom_bar(stat = "identity") +
+  scale_fill_manual(
+    values = c("Disadvantaged" = "blue", "Committing" = "red")) +
+  labs(
+    x = "Call Type",
+    fill = "Role") +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1))
+
+plot_grid(jokic1, jokic2)
+
+
+```
+It appears that the incorrect calls Jokic is predominantly involved in are mostly fouls, but specifically personal, shooting and loose ball fouls. It also seems like he loves to initiate contact, and he often gets away with more than he probably should when it comes to offensive fouls. 
+
+However, that gets balanced out by him being on the unfortunate side of calls for personal and shooting fouls. Regardless, it just seems like contact always finds him.
+
+### Question 3: What is the distribution of incorrect calls by year? 
+Other findings in this section include the number of incorrect calls between the 4Q versus OT 
+
+In this next section, I'm interested in finding out whether late game refereeing has changed significantly over the years since these reports were introduced. 
+
+```{r}
+
+l2m_summary <- l2m |>
+  filter(decision %in% c("IC", "INC", "CC", "CNC")) |> 
+  filter(season >= 2015 & season <= 2024) |> 
+  group_by(season, decision) |> 
+  summarise(count = n())
+
+ggplot(l2m_summary, aes(x = season, y = count, color = decision, group = decision)) +
+  geom_line(size = 1) +
+  geom_point(size = 2) +
+  labs(
+    title = "NBA Late-Game Refereeing is Predominantly Consistent Except for Correct No Calls",
+    subtitle = "Correct and incorrect calls by year.",
+    x = "Season",
+    y = "Number of Calls",
+    color = "Decision Type",
+    caption = "Data: atlhawksfanatic (GitHub) | By Pablo Suarez"
+  ) +
+  scale_color_manual(
+    values = c("CC" = "green", "CNC" = "blue", "IC" = "red", "INC" = "orange"),
+    labels = c("CC" = "Correct Call", 
+               "CNC" = "Correct No Call", 
+               "IC" = "Incorrect Call", 
+               "INC" = "Incorrect No Call")
+  ) +
+  scale_x_continuous(breaks = seq(2015, 2025, by = 1)) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    legend.position = "bottom")
+
+
+```
+Overall, it appears that NBA referees seem to have a decent handle on accurately calling games. Only the plays classified as correct no calls seem to fluctuate from season to season. I would think that no call plays are just dependent on how much action there is at the end of games. Closer games would typically require more officiating compared to blowouts or decisive victories since the team that's ahead would be running out the clock. 
+
+Next, let's see how calls between the last two minutes of the fourth quarter compare to overtime plays. 
+
+```{r}
+
+q4ot_counts <- l2m |>
+  filter(decision %in% c("IC", "INC", "CC", "CNC")) |> 
+  group_by(period, decision) |>
+  summarise(count = n()) |> 
+  arrange(period, desc(count))
+
+ggplot(q4ot_counts, aes(x = decision, y = count, fill = period)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  scale_fill_manual(
+    values = c("Q4" = "skyblue", "Q5" = "coral"),
+    labels = c("Q4" = "4th Quarter", "Q5" = "Overtime")
+  ) +
+  labs(
+    title = "Comparison of Call Decisions in Q4 and Q5",
+    x = "Decision Type",
+    y = "Count",
+    fill = "Period"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1), 
+    legend.position = "bottom")
+
+```
+I should've seen that one coming. Obviously there's a significant difference between Q4 and OT calls as not every games goes to OT. 
+
+Instead, let's see what refs are calling in OT plays. 
+
+```{r}
+
+q5_calls <- l2m |>
+  filter(period == "Q5", !is.na(call_type)) |> 
+  group_by(call_type) |> 
+  summarise(count = n()) |> 
+  arrange(desc(count)) |> 
+  slice_head(n = 10)
+
+ggplot(q5_calls, aes(x = reorder(call_type, count), y = count)) +
+  geom_bar(stat = "identity", fill = "blue") +
+  coord_flip() + 
+  labs(
+    title = "Common Fouls Are Common in Overtime Scenarios",
+    x = "Call Type",
+    y = "Count",
+    caption = "Data: atlhawksfanatic (GitHub) | By Pablo Suarez"
+  ) +
+  theme_minimal()
+
+```
+Again, nothing too crazy compared to what we've already seen. Like other charts, it appears that fouls take the cake in overtime as well. 
+
+Next Steps for this Question: 
+- Comparing the accuracy of OT calls in relation to the 7% threshold from the dataframe.
+- Distribution of CC, CNC, IC and INC calls by each top ten call in OT
+
+----------------
 
 Further Analysis:
-- Who are the teams that have been either the beneficiaries or victims of incorrect officiating decisions?
-- Do games on national TV lead to more or less accurate calls at the end of games?
-- Which officials have the highest amount of incorrect calls? Additionally, what's the percentage of incorrect calls made by these officials?
-- Incorrect calls by year.
-- Number of incorrect calls in 4Q vs OT.
+- Who are the teams that have been either the beneficiaries or victims of incorrect officiating decisions? Is there a difference in home versus away calls for some of them?
+Given that I've already done this for players, I think I should be able to follow a similar process for the teams. I'll start by creating one big filter that includes each team's name, but it shouldn't give me too much trouble. 
 
+- Do games on national TV lead to more or less accurate calls at the end of games?
+This should be possible with the national_tv column in the dataframe. It contains values for ESPN, TNT, NBATV or "no." I could filter out all of the rows with "no" values to begin my analysis for that question.
+
+- Which officials have the highest amount of incorrect calls? Additionally, what's the percentage of incorrect calls made by these officials?
+This should also be possible as there are three separate columns to denote the officials for each game. This would be an approximate value as there is no data that suggests which official initiated a call. But I think this should be relatively straightforward to accomplish.
 
 
 

@@ -277,6 +277,8 @@ plot_usmap(data = pg_sn, values = "parent_notification_combo", regions = "states
 Notes:
 Specify which states don't have NIL in the legend. (Fixed)
 
+- The number of states: Do a cartogram, the number of states (waffle chart? these number of states have this, emphasize the difference in choices here. Visualize the fact that very few states have a reporting requirement.)
+
 ------------------------
 What else do we want to see? What direction do we want to take with our reporting? What changes can we make to the Google Form to continue refining this data?
 
@@ -770,6 +772,25 @@ Final Thoughts:
 
 
 
+--------------
 
+Meeting with Prof. Hyman on 11/21/24
 
+Taking out states that don't have NIL policies (count up the total number of high school athletes)
 
+- The way policies differ from one another (if md is the only state that prohibits video game NIL deals): Showing the collection of policies 
+   - Decent amount of variation, how it's defined or the policy. Stack the policies as images, one on top of the other (four or five examples of here is what this state says)
+   
+   Penalty provisions, including the three-strike states, collectives
+   
+  Table: Here's a term, here's how this state defines it compared to another. How most states define it. How they are defining or choosing not to define something.
+  
+  
+  State association is to distance themselves from liability. Number 
+
+All about differences, either explicit or gaps in ambiguity in the way policies are phrased.
+
+Reader perspective: Some might not know NIL, some people don't know about sports. With regard to policies, what questions: Can a 15 year old kid do a commercial with a Smith and Wesson firearm? Address that curiosity.
+
+NFHS data: 
+- Participation data is relevant. 
