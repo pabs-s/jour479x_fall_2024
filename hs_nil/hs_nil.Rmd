@@ -275,7 +275,6 @@ plot_usmap(data = pg_sn, values = "parent_notification_combo", regions = "states
 ```
 
 Notes:
-Specify which states don't have NIL in the legend. (Fixed)
 
 - The number of states: Do a cartogram, the number of states (waffle chart? these number of states have this, emphasize the difference in choices here. Visualize the fact that very few states have a reporting requirement.)
 
@@ -424,18 +423,18 @@ Map Visualization of Number of Prohibited Categories by State
 
 ```{r}
 
-plot_usmap(data = map_data, values = "catcount", regions = "states") +
-  scale_fill_manual(values = c(
-    "0" = "lightblue",
-    "2" = "skyblue",
-    "3" = "dodgerblue",
-    "4" = "blue",
-    "5" = "navy",
-    "6" = "darkblue",
-    "7" = "purple"
-  ), na.value = "grey80") +
-  labs(title = "Number of Prohibited NIL Categories by U.S. State", fill = "Prohibited\nCategories") +
-  theme(panel.background = element_blank())
+#plot_usmap(data = map_data, values = "catcount", regions = "states") +
+#  scale_fill_manual(values = c(
+#    "0" = "lightblue",
+#    "2" = "skyblue",
+#    "3" = "dodgerblue",
+#    "4" = "blue",
+#    "5" = "navy",
+#    "6" = "darkblue",
+#    "7" = "purple"
+#  ), na.value = "grey80") +
+#  labs(title = "Number of Prohibited NIL Categories by U.S. State", fill = "Prohibited\nCategories") +
+#  theme(panel.background = element_blank())
 
 ```
 Notes: 
@@ -479,20 +478,22 @@ tot_hs <- tot_hs |>
 
 plot_usmap(data = tot_hs, values = "Total", regions = "states") +
   scale_fill_viridis(
-    option = "magma",  # Other options: "plasma," "viridis", "magma", "cividis"
+    option = "plasma",  # Other options: "plasma," "viridis", "magma", "cividis"
     name = "Total Athletes",
-    label = scales::comma
+    label = scales::comma,
+    direction = -1  
   ) +
   theme_minimal() +
   labs(
     title = "Total High School Athletes by State (2023-24)",
     subtitle = "Data includes boys and girls participation rates",
-     caption = "Data: NFHS")
+    caption = "Data: NFHS"
+  )
 
 ```
 
 Notes:
-Flip the colors, also let's fix the gradient for better contrast.
+
 
 
 ---------
@@ -623,6 +624,8 @@ ggplot(sport_part_long, aes(x = sport, y = Participants, fill = Gender)) +
 
 Notes:
 How can we add context for this chart through reporting (i.e., Do we have a sense for the distribution of HS NIL deals by sport?)
+
+Girls playing 11 on 11.
 
 Here's the same info in a table format:
 ```{r}
@@ -786,7 +789,7 @@ Taking out states that don't have NIL policies (count up the total number of hig
   Table: Here's a term, here's how this state defines it compared to another. How most states define it. How they are defining or choosing not to define something.
   
   
-  State association is to distance themselves from liability. Number 
+State association is to distance themselves from liability. Number 
 
 All about differences, either explicit or gaps in ambiguity in the way policies are phrased.
 

@@ -180,11 +180,11 @@ Above is a list of the 15 players with the highest combined counts of disadvanta
 
 After fixing the graphic, Nikola Jokic leads all NBA players for references in plays with incorrect calls and no calls with a count of 117. He's also the only player in the top 8 that has been the disadvantaged player more than the committing player.
 
-Conversely, players like Horford, Draymond Green, Karl-Anthony Towns are major offenders in terms of having high disparity between the instances where they are disadvantaged compared to committing fouls or turnovers.
+Conversely, players like Horford, Draymond Green and Karl-Anthony Towns are major offenders in terms of having high disparity between the instances where they are disadvantaged compared to committing fouls or turnovers.
 
-Roughly half of these players are considered centers or power forwards (a.k.a., big men). This might be because there position on the court would make them susceptible to contact. The players who would be considered exceptions to this rule, like James Harden, Westbrook and Jimmy Butler, have also made a living by frequently getting into the paint for layups. 
+Roughly half of these players are considered centers or power forwards (a.k.a., big men). This might be because their position on the court would make them susceptible to contact. The players who would be considered exceptions to this rule, like James Harden, Westbrook and Jimmy Butler, have also made a living by frequently getting into the paint for layups. 
 
-Looking more into Nikola Jokic, I isolated the 2-minute report data to only show instances where he was referenced, which resulted in 1,562 plays. Filtering that data even further, I pulled all of the plays involving Jokic where the call was either incorrectly called or not called. That narrowed the dataframe down to 117 plays. That means that out of all of the last 2-minute report plays involving Jokic, roughly 7.5% of them ended with an incorrect call by the officials. 
+Looking more into Nikola Jokic, I isolated the 2-minute report data to only show instances where he was referenced, which resulted in 1,562 plays. Filtering that data even further, I pulled all of the plays involving Jokic where the call was either incorrectly called or not called. That narrowed the dataframe down to 117 plays. That means that out of all of the last 2-minute report plays involving Jokic, roughly 7.5% of them ended with an incorrect call by the officials. Slightly higher than the league baseline that was previously established.
 
 ```{r}
 # code for checking horford disparity 
@@ -273,7 +273,7 @@ ggplot(l2m_summary, aes(x = season, y = count, color = decision, group = decisio
   geom_line(size = 1) +
   geom_point(size = 2) +
   labs(
-    title = "NBA Late-Game Refereeing is Predominantly Consistent Except for Correct No Calls",
+    title = "NBA Late-Game Refereeing is Consistent Except for Correct No Calls",
     subtitle = "Correct and incorrect calls by year.",
     x = "Season",
     y = "Number of Calls",
@@ -352,9 +352,242 @@ ggplot(q5_calls, aes(x = reorder(call_type, count), y = count)) +
 ```
 Again, nothing too crazy compared to what we've already seen. Like other charts, it appears that fouls take the cake in overtime as well. 
 
-Next Steps for this Question: 
-- Comparing the accuracy of OT calls in relation to the 7% threshold from the dataframe.
-- Distribution of CC, CNC, IC and INC calls by each top ten call in OT
+```{r}
+
+all_ot_calls <- l2m |> filter(period == "Q5", !is.na(call_type)) 
+
+tot_ot_calls <- nrow(all_ot_calls) #9900
+  
+inc_ot_calls <- all_ot_calls |> filter(decision %in% c("IC", "INC")) |> nrow() #752
+
+pct_inc_ot_calls <- (inc_ot_calls / tot_ot_calls) * 100
+
+cat("Percentage of IC + INC OT calls out of total number of OT calls:", pct_inc_ot_calls, "%\n")
+
+```
+
+After filtering the two minute report dataframe for only overtime calls, I calculated the percentage of incorrectly called or uncalled fouls and turnovers. There were 9,900 total plays, with 752 of those listed as incorrect calls and no calls. With some simple math, I found that the percentage is roughly 7.6% which is a marginally higher difference than the 7% baseline. 
+
+```{r}
+
+filtered_ot_calls <- all_ot_calls |>
+  filter(call_type %in% c(
+    "Foul: Personal",
+    "Foul: Shooting",
+    "Foul: Offensive",
+    "Foul: Loose Ball",
+    "Turnover: Traveling",
+    "Foul: Defensive 3 Second",
+    "Instant Replay: Support Ruling",
+    "Stoppage: Out-of-Bounds",
+    "Foul: Personal Take",
+    "Turnover: 24 Second Violation"
+  )) |>
+  mutate(call_type = case_when(
+    call_type == "Turnover: 24 Second Violation" ~ "24 Sec. Violation",
+    call_type == "Instant Replay: Support Ruling" ~ "Instant Replay",
+    TRUE ~ call_type 
+  ))
+
+ggplot(filtered_ot_calls, aes(x = decision, fill = decision)) +
+  geom_bar() +
+  facet_wrap(~call_type, scales = "free_y") +  
+  theme_minimal() +
+  labs(
+    title = "There's an OT Traveling Problem",
+    subtitle = "Distribution of top ten calls in NBA overtimes since March 2015.",
+    x = "Decision",
+    y = "Count",
+    fill = "Decision",
+    caption = "Data: atlhawksfanatic (GitHub) | By Pablo Suarez"
+  ) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    strip.text = element_text(size = 10)
+  )
+
+```
+Although we've established that NBA refs are still pretty good compared to the 7% baseline. I was still interested in seeing the distribution of those top ten common calls. I can't say that the results are entirely surprising, but there are a few things worth noting.
+
+For starters, instant replay calls were essentially entirely accurate. That's great news for NBA refs that when they leverage technology and take a close look, they are found to make the right calls all of the time. On the flip side, traveling violations seem to cause them a slew of problems. Granted travels account for a much smaller percentage of calls in the reports, they have by a significant margin the highest proportion of incorrect no calls compared to correct calls and no calls.
+
+The "NA" values in the traveling section of the bar charts represent calls that were only "observable in enhanced video" by the referees who reviewed the play for the report. That signifies that between the 2015 season and now, there have been nearly 125 instances where referees failed to recognize a travel in overtime scenarios. 
+
+Again, that's pretty impressive all considered, especially because actions occur so quickly on the court. It would be a fun exercise to look more in-depth at these calls to see how costly each one is and how it might've impacted games and teams. That's another challenge for another day.
+
+###Question 4: Do games on national TV lead to more or less accurate calls at the end of games?
+
+Considering that the NBA last 2-minute reports note whether a game is played on national TV and that it specifies the network if it is, I feel that it's worth assessing referee performance in games where "everybody" is watching. 
+
+```{r}
+
+nat_tv <- l2m |>
+  filter(national_tv != "no")
+
+tot_nat_tv <- nrow(nat_tv) 
+
+inc_nattv_calls <- nat_tv |> 
+  filter(decision %in% c("IC", "INC")) |> 
+  nrow()
+
+pct_inc_nattv_calls <- (inc_nattv_calls / tot_nat_tv) * 100
+
+cat("Percentage of IC + INC calls out of total number of calls in national TV games:", pct_inc_nattv_calls, "%\n")
+
+```
+
+The short answer here is that NBA refs in nationally televised games are slightly better than the 7% baseline average. It's not a significant difference, but it's also not nothing. Intuitively, it makes sense. The NBA has a vested interest in ensuring that games shown nationally are adequately officiated. That's not to say other games aren't, but more viewers equals more scrutiny and the league is better off saving its slightly more accurate crews for these games.
+
+Let's then take a look at the difference among networks. The reports specify three national networks---ESPN, TNT and NBA TV. 
+
+```{r}
+
+espn <- l2m |>
+  filter(national_tv == "ESPN")
+
+tot_espn <- nrow(espn)
+
+inc_espn <- espn |> 
+  filter(decision %in% c("IC", "INC")) |> 
+  nrow()
+
+pct_espn <- (inc_espn / tot_espn) * 100
+
+cat("Percentage of IC + INC calls out of total number of calls in ESPN games:", pct_espn, "%\n")
+
+```
+
+```{r}
+
+tnt <- l2m |>
+  filter(national_tv == "TNT")
+
+tot_tnt <- nrow(tnt)
+
+inc_tnt <- tnt |> 
+  filter(decision %in% c("IC", "INC")) |> 
+  nrow()
+
+pct_tnt <- (inc_tnt / tot_tnt) * 100
+
+cat("Percentage of IC + INC calls out of total number of calls in TNT games:", pct_tnt, "%\n")
+
+```
+
+```{r}
+
+nbatv <- l2m |>
+  filter(national_tv == "NBATV")
+
+tot_nbatv <- nrow(nbatv)
+
+inc_nbatv <- nbatv |> 
+  filter(decision %in% c("IC", "INC")) |> 
+  nrow()
+
+pct_nbatv <- (inc_nbatv / tot_nbatv) * 100
+
+cat("Percentage of IC + INC calls out of total number of calls in NBA TV games:", pct_nbatv, "%\n")
+
+```
+
+Referee performance across ESPN and TNT games is relatively normal. It's the NBA TV games that see a significant increase in the percentage of incorrectly called and uncalled plays, a roughly 5% increase to be more precise. That seems unusual compared to what I've observed up to this point.  
+
+Let's see what we can find out. First I'm taking a look at what's predominantly called in these NBA TV games.
+
+```{r}
+
+nbatv_count <- l2m |>
+  filter(national_tv == "NBATV") |> 
+  group_by(call_type) |> 
+  summarise(count = n()) |> 
+  arrange(desc(count)) |> 
+  slice_head(n = 10)
+
+ggplot(nbatv_count, aes(x = reorder(call_type, count), y = count)) +
+  geom_bar(stat = "identity", fill = "blue") +
+  coord_flip() + 
+  labs(
+    title = "Fouls Are A Dime a Dozen in NBA TV Games",
+    x = "Call Type",
+    y = "Count",
+    caption = "Data: atlhawksfanatic (GitHub) | By Pablo Suarez"
+  ) +
+  theme_minimal()
+
+
+```
+Again, nothing revolutionary here. Common fouls seem to be what draws whistles. 
+
+```{r}
+
+filtered_nbatv <- nbatv |>
+  filter(call_type %in% c(
+    "Foul: Shooting",
+    "Foul: Personal",
+    "Foul: Offensive",
+    "Foul: Loose Ball",
+    "Instant Replay: Support Ruling",
+    "Turnover: Traveling",
+    "Turnover: 24 Second Violation",
+    "Turnover: 5 Second Inbound",
+    "Foul: Personal Take",
+    "Foul: Defensive 3 Second"
+  )) |>
+  mutate(call_type = case_when(
+    call_type == "Turnover: 24 Second Violation" ~ "24 Sec. Violation",
+    call_type == "Instant Replay: Support Ruling" ~ "Instant Replay",
+    call_type == "Turnover: 5 Second Inbound" ~ "5 Sec. Inbound",
+    TRUE ~ call_type 
+  ))
+
+ggplot(filtered_nbatv, aes(x = decision, fill = decision)) +
+  geom_bar() +
+  facet_wrap(~call_type, scales = "free_y") +  
+  theme_minimal() +
+  labs(
+    title = "Traveling Violations are Also a Problem Here",
+    subtitle = "Distribution of top ten calls in NBA TV games since March 2015.",
+    x = "Decision",
+    y = "Count",
+    fill = "Decision",
+    caption = "Data: atlhawksfanatic (GitHub) | By Pablo Suarez"
+  ) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    strip.text = element_text(size = 10)
+  )
+
+```
+Similar to what I saw with the overtime calls, there seems to be an issue with calling traveling violations in these NBA TV games. The 5-second inbound calls aren't entirely as worrisome as they appear. There are only five total instances across the NBA TV dataframe I made and four of them happened in 2015, while the remaining one occurred in 2016. 
+
+I would reason that the cause behind the higher percentage of incorrect calls is due to having a lower number of calls to examine, which would naturally skew percentages. 
+
+### Question 5: What does call accuracy look like when game scores are within two points?
+
+```{r}
+
+close_games <- l2m |>
+  filter(abs(home_score - away_score) <= 2)
+
+close_games
+
+```
+
+```{r}
+
+tot_close <- nrow(close_games)
+
+inc_close <- close_games |> 
+  filter(decision %in% c("IC", "INC")) |> 
+  nrow()
+
+pct_close <- (inc_close / tot_close) * 100
+
+cat("Percentage of IC + INC calls out of total number of calls in two-point games:", pct_close, "%\n")
+
+
+```
 
 ----------------
 
@@ -362,13 +595,7 @@ Further Analysis:
 - Who are the teams that have been either the beneficiaries or victims of incorrect officiating decisions? Is there a difference in home versus away calls for some of them?
 Given that I've already done this for players, I think I should be able to follow a similar process for the teams. I'll start by creating one big filter that includes each team's name, but it shouldn't give me too much trouble. 
 
-- Do games on national TV lead to more or less accurate calls at the end of games?
-This should be possible with the national_tv column in the dataframe. It contains values for ESPN, TNT, NBATV or "no." I could filter out all of the rows with "no" values to begin my analysis for that question.
-
 - Which officials have the highest amount of incorrect calls? Additionally, what's the percentage of incorrect calls made by these officials?
 This should also be possible as there are three separate columns to denote the officials for each game. This would be an approximate value as there is no data that suggests which official initiated a call. But I think this should be relatively straightforward to accomplish.
-
-
-
 
 
