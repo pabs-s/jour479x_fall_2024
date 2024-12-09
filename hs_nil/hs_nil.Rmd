@@ -246,6 +246,16 @@ combo_colors <- c("Y_Y" = "blue", "Y_N" = "purple", "N_Y" = "yellow", "N_N" = "r
 
 ```{r}
 
+pg_sn |>
+  group_by(parent_notification_combo) |>
+  summarise(count = n())
+
+```
+
+
+
+```{r}
+
 plot_usmap(data = pg_sn, values = "parent_notification_combo", regions = "states") +
   scale_fill_manual(
     name = "Requirement",
