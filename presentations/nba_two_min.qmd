@@ -593,7 +593,7 @@ cat("Percentage of IC + INC calls out of total number of calls in two-point game
 
 ----------------
 
-Prof. Willis: What is the broad state of late-game calls, and when does that vary?
+
 
 Further Analysis:
 - Who are the teams that have been either the beneficiaries or victims of incorrect officiating decisions? Is there a difference in home versus away calls for some of them?

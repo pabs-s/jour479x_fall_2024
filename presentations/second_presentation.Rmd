@@ -320,4 +320,168 @@ However, this also paints a less flattering image of Jokic, he's not that innoce
 
 Regardless, it just seems like contact always finds him.
 
+### Impact by National TV Network
+
+Considering that the two-minute reports note whether a game is played on national TV and that it specifies the network if it is, it's worth assessing referee performance in games where "everybody" is watching. 
+
+```{r}
+
+nat_tv <- l2m |>
+  filter(national_tv != "no")
+
+tot_nat_tv <- nrow(nat_tv) 
+
+inc_nattv_calls <- nat_tv |> 
+  filter(decision %in% c("IC", "INC")) |> 
+  nrow()
+
+pct_inc_nattv_calls <- (inc_nattv_calls / tot_nat_tv) * 100
+
+cat("Percentage of IC + INC calls out of total number of calls in national TV games:", pct_inc_nattv_calls, "%\n")
+
+```
+
+Using a similar process to how the 7% baseline was established, the percentage of incorrect calls on national TV is just slightly better than average at 6.8%. 
+
+It's not a significant difference, but it's also not nothing. Intuitively, it makes sense. The NBA has a vested interest in ensuring that games shown nationally are adequately officiated. That's not to say other games aren't, but more viewers equals more scrutiny and the league is better off saving its slightly more accurate crews for these games.
+
+Let's then take a look at the difference among networks. The reports specify three national networks -- ESPN, TNT and NBA TV. 
+
+```{r}
+
+espn <- l2m |>
+  filter(national_tv == "ESPN")
+
+tot_espn <- nrow(espn)
+
+inc_espn <- espn |> 
+  filter(decision %in% c("IC", "INC")) |> 
+  nrow()
+
+pct_espn <- (inc_espn / tot_espn) * 100
+
+cat("Percentage of IC + INC calls out of total number of calls in ESPN games:", pct_espn, "%\n")
+
+```
+
+```{r}
+
+tnt <- l2m |>
+  filter(national_tv == "TNT")
+
+tot_tnt <- nrow(tnt)
+
+inc_tnt <- tnt |> 
+  filter(decision %in% c("IC", "INC")) |> 
+  nrow()
+
+pct_tnt <- (inc_tnt / tot_tnt) * 100
+
+cat("Percentage of IC + INC calls out of total number of calls in TNT games:", pct_tnt, "%\n")
+
+```
+
+```{r}
+
+nbatv <- l2m |>
+  filter(national_tv == "NBATV")
+
+tot_nbatv <- nrow(nbatv)
+
+inc_nbatv <- nbatv |> 
+  filter(decision %in% c("IC", "INC")) |> 
+  nrow()
+
+pct_nbatv <- (inc_nbatv / tot_nbatv) * 100
+
+cat("Percentage of IC + INC calls out of total number of calls in NBA TV games:", pct_nbatv, "%\n")
+
+```
+
+Referee performance across ESPN and TNT games is relatively normal. It's the NBA TV games that see a significant increase in the percentage of incorrectly called and uncalled plays, a roughly 5% increase to be more precise. That seems unusual compared to what has been observed up to this point.  
+
+Getting to the root of the problem requires understanding what is predominantly called in these NBA TV games.
+
+```{r}
+
+nbatv_count <- l2m |>
+  filter(national_tv == "NBATV") |> 
+  group_by(call_type) |> 
+  summarise(count = n()) |> 
+  arrange(desc(count)) |> 
+  slice_head(n = 10)
+
+ggplot(nbatv_count, aes(x = reorder(call_type, count), y = count)) +
+  geom_bar(stat = "identity", fill = "blue") +
+  coord_flip() + 
+  labs(
+    title = "Fouls Are A Dime a Dozen in NBA TV Games",
+    x = "Call Type",
+    y = "Count",
+    caption = "Data: atlhawksfanatic (GitHub) | By Pablo Suarez"
+  ) +
+  theme_minimal()
+
+```
+
+This finding aligns with the previous counts of calls made in the last two minutes. A better idea would be to see the distribution of all of these calls.
+
+```{r}
+
+filtered_nbatv <- nbatv |>
+  filter(call_type %in% c(
+    "Foul: Shooting",
+    "Foul: Personal",
+    "Foul: Offensive",
+    "Foul: Loose Ball",
+    "Instant Replay: Support Ruling",
+    "Turnover: Traveling",
+    "Turnover: 24 Second Violation",
+    "Turnover: 5 Second Inbound",
+    "Foul: Personal Take",
+    "Foul: Defensive 3 Second"
+  )) |>
+  mutate(call_type = case_when(
+    call_type == "Turnover: 24 Second Violation" ~ "24 Sec. Violation",
+    call_type == "Instant Replay: Support Ruling" ~ "Instant Replay",
+    call_type == "Turnover: 5 Second Inbound" ~ "5 Sec. Inbound",
+    TRUE ~ call_type 
+  ))
+
+ggplot(filtered_nbatv, aes(x = decision, fill = decision)) +
+  geom_bar() +
+  facet_wrap(~call_type, scales = "free_y") +  
+  theme_minimal() +
+  labs(
+    title = "Traveling Violations are Also a Problem Here",
+    subtitle = "Distribution of top ten calls in NBA TV games since March 2015.",
+    x = "Decision",
+    y = "Count",
+    fill = "Decision",
+    caption = "Data: atlhawksfanatic (GitHub) | By Pablo Suarez"
+  ) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    strip.text = element_text(size = 10)
+  )
+
+```
+
+Similar to the overall findings from the data, there seems to be an issue with calling certain violations in these NBA TV games. The 5-second inbound calls aren't entirely as worrisome as they appear. There are only five total instances across the NBA TV dataframe I made and four of them happened in 2015, while the remaining one occurred in 2016. Although it is a bit surprising that these calls either haven't taken place or been reviewed since then. 
+
+The traveling calls, again, aren't necessarily frequently called, but the proportion of incorrect calls should be cause for attention from referees. That's especially considering that unlike the overall trends, incorrect calls are outpacing correctly judged travels on NBA TV games.
+
+If there's anything that referees and the NBA can take away from this, it's that there's some work to do in terms of addressing calls beyond common fouls.
+
+
+
+
+
+
+
+
+
+
+
+
 
