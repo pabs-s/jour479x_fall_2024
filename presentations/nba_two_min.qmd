@@ -1,6 +1,8 @@
 
 #Presentation 2: NBA Last Two-Minute Report
 
+GitHub Link to Final Presentation: 
+
 This presentation focuses on the “NBA Officiating Last Two Minute Reports,” which are publicly accessible tables that share information related to the accuracy of calls made in the last two minutes of each game. Using this information, I'd like to identify the teams and players that have been either the beneficiaries or victims of incorrect officiating decisions. I'd also like to assess (to a degree) the accuracy of NBA referees in these late-game situations when calls have even more impact.
 
 In my background research for this presentation, I found three examples of others who have attempted a similar analysis. The first source, which is from a GitHub user named atlhawksfanatic, offers a dataset formatted for R that is updated through Nov. 8, 2024. Here is the link to the GitHub page (https://github.com/atlhawksfanatic/L2M?tab=readme-ov-file).
@@ -590,6 +592,8 @@ cat("Percentage of IC + INC calls out of total number of calls in two-point game
 ```
 
 ----------------
+
+Prof. Willis: What is the broad state of late-game calls, and when does that vary?
 
 Further Analysis:
 - Who are the teams that have been either the beneficiaries or victims of incorrect officiating decisions? Is there a difference in home versus away calls for some of them?
