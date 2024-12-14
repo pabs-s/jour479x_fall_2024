@@ -1,7 +1,7 @@
 
 #Presentation 2: NBA Last Two-Minute Report
 
-GitHub Link to Final Presentation: 
+GitHub Link to Final Presentation: https://github.com/pabs-s/jour479x_fall_2024/blob/main/presentations/second_presentation.Rmd
 
 This presentation focuses on the “NBA Officiating Last Two Minute Reports,” which are publicly accessible tables that share information related to the accuracy of calls made in the last two minutes of each game. Using this information, I'd like to identify the teams and players that have been either the beneficiaries or victims of incorrect officiating decisions. I'd also like to assess (to a degree) the accuracy of NBA referees in these late-game situations when calls have even more impact.
 
