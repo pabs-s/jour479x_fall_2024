@@ -92,7 +92,7 @@ top_ten_inc <- incorrect_calls |>
   slice_head(n = 10)  
 
 ggplot(top_ten_inc, aes(x = reorder(call_type, count), y = count)) +
-  geom_bar(stat = "identity") +
+  geom_bar(stat = "identity", fill = "blue") +  
   coord_flip() +  
   scale_y_continuous(breaks = seq(0, max(top_ten_inc$count), by = 100)) +
   labs(
@@ -187,9 +187,9 @@ If referees are struggling when faced with catching these violations, that is an
 
 Again, these violations are a drop in the bucket compared to fouls. But in close games, every call matters and who's to say how better accuracy might alter the outcome.
 
-###Impact on Players
+###Impact on Players and Teams
 
-Let's address the elephant in the room: Which players are adversely or positively impacted by NBA refereeing?
+Let's address the elephant in the room: Which players and teams are adversely or positively impacted by NBA refereeing?
 
 The reports use two labels to denote players involved in a given call: committing and disadvantaged. To a degree, it's straightforward to interpret. The player initiating the call is "committing" the act, while the player at the receiving end is considered "disadvantaged." Given that the data contains correct no calls or that players "flop," it's not always the case that the disadvantaged player is necessarily the one who is always negatively impacted by the outcome of a call. But assessing the true impact of each call is a much more taxing task and something that will require going call-by-call. I settled for the labels and how the report interpreted these calls in the meantime.
 
@@ -304,7 +304,7 @@ jokic2 <- ggplot(jokic_call_summary, aes(x = call_type, y = count, fill = role))
 
 ```
 
-I isolated the 2-minute report data to only show instances where he was referenced, which resulted in 1,562 plays. Filtering that data even further, I pulled all of the plays involving Jokic where the call was either incorrectly called or not called. That narrowed the data down to 117 plays. That means that out of all of the last 2-minute report plays involving Jokic, roughly 7.5% of them ended with an incorrect call by the officials. Slightly higher than the league baseline that was previously established.
+Isolating the two-minute report data to only show instances where he was referenced returned 1,562 plays. Filtering that data even further, I pulled all of the plays involving Jokic where the call was either incorrectly called or not called. That narrowed the data down to 117 plays. That means that out of all of the last two-minute report plays involving Jokic, roughly 7.5% of them ended with an incorrect call by the officials. Slightly higher than the league baseline that was previously established.
 
 So what about a distribution of his committing versus disadvantaged fouls?
 
@@ -316,9 +316,85 @@ plot_grid(jokic1, jokic2)
 
 It appears that the incorrect calls Jokic is predominantly involved in are mostly fouls, but specifically personal, shooting and loose ball fouls. It looks like he often find himself on the unfortunate side of calls for personal and shooting fouls.
 
-However, this also paints a less flattering image of Jokic, he's not that innocent. He appears to frequently initiate contact on the offensive side of the ball, and often gets away with more than he probably should when it comes to offensive fouls. NBA referees have deemed plenty of incorrect no calls regarding his offensive fouls and they disproportionately benefit him.
+However, this also paints a less flattering image of Jokic. He's not that innocent. He appears to frequently initiate contact on the offensive side of the ball, and often gets away with more than he probably should when it comes to offensive fouls. NBA referees have deemed plenty of incorrect no calls regarding his offensive fouls and they disproportionately benefit him.
 
 Regardless, it just seems like contact always finds him.
+
+Shifting focus, here is that same analysis applied to teams in order to identify the most disadvantaged teams when it comes to incorrect calls. 
+
+```{r}
+
+teams <- c("Celtics", "Nets", "Knicks", "76ers", "Raptors", 
+           "Bulls", "Cavaliers", "Pistons", "Pacers", "Bucks", 
+           "Hawks", "Hornets", "Heat", "Magic", "Wizards", 
+           "Nuggets", "Timberwolves", "Thunder", "Trail Blazers", 
+           "Jazz", "Warriors", "Clippers", "Lakers", "Suns", 
+           "Kings", "Mavericks", "Rockets", "Grizzlies", 
+           "Pelicans", "Spurs")
+
+top_teams <- player_counts |>
+  filter(!is.na(player), player %in% teams) |>  
+  arrange(desc(total_count)) |>  
+  slice(1:15)  
+
+ggplot(top_teams, aes(x = dis_count, xend = com_count, y = reorder(player, total_count))) +
+  geom_dumbbell(
+    colour = "grey", 
+    size = 2,         
+    dot_guide = TRUE, 
+    dot_guide_size = 0.5) +
+  geom_point(aes(x = dis_count), color = "blue", size = 3) +  
+  geom_point(aes(x = com_count), color = "red", size = 3) +   
+  labs(
+    title = "Top 15 Teams: Disadvantaged vs. Committing Counts",
+    subtitle = "Involvement in incorrect calls and no calls in NBA L2M report.",
+    x = "Number of Plays",
+    y = "Player",
+    caption = "Blue = Disadvantaged, Red = Committing | Data: atlhawksfanatic (GitHub) | By Pablo Suarez") +
+  theme_minimal()
+
+```
+
+It's deja vu for Jokic and his Nuggets. After following the same process to identify the top 15 teams and their involvement in incorrect calls and no calls, the Denver Nuggets lead the league with 53 disadvantaged calls. 
+
+It's also interesting that the Memphis Grizzlies lead all teams with five committing calls. That's possibly because there are many more possibilities for a call to be disadvantageous for a team rather than a team collectively commit some sort of offense.  
+
+For context, the graphic above is strictly for calls that are attributed directly to the team in the reports. Getting an even clearer picture of the frequency for a team's advantageous or disadvantageous calls requires totaling all instances of referenced players. For what it's worth. I think it's possible to figure out moving forward, as the "comments" column in the dataframe contains abbreviations for referenced players. Here's an example involving Jokic himself, "Jokic (DEN) establishes himself in a screening position..." I would filter the column for those team abbreviations and then group those rows based on the committing vs disadvantaged result.
+
+Okay, tangent over, now back to the Nuggets. Here is a distribution of those calls involving the team.
+
+```{r}
+
+nuggets <- l2m |> filter(disadvantaged == "Nuggets" | committing == "Nuggets")
+nuggets_inc_calls <- nuggets |> filter(decision %in% c("INC", "IC")) 
+
+nuggets_count <- nuggets_inc_calls |>
+  group_by(call_type, decision) |>
+  summarise(count = n(), .groups = "drop") |>
+  arrange(desc(count))
+
+ggplot(nuggets_count, aes(x = call_type, y = count, fill = decision)) +
+  geom_bar(stat = "identity") +
+  scale_fill_manual(
+    values = c("INC" = "blue", "IC" = "red")) +
+  labs(
+    title = "Nuggets Suffer from Uncalled Opponent Travels and Def. 3 Seconds",
+    x = "Call Type",
+    y = "Count",
+    fill = "Decision",
+    caption = "Data: atlhawksfanatic (GitHub) | By Pablo Suarez") +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    plot.margin = margin(10, 10, 10, 30))
+
+
+```
+
+Unfortunately for the Nuggets, it appears that they are not necessarily getting the traveling and defensive three second calls that they are owed. Between both calls, that's essentially 36 possessions the team was owed since 2015. It'd be interesting to understand how impactful those calls could have been in close games. 
+
+Equally compelling is the disparity between those two specific types of calls and every other call referenced in the chart. Traveling has already proven to be troublesome for referees to accurately assess in real-time. However, this is the first time observing defensive three seconds as a problem area as well. 
+As noted in other sections, these calls (or no calls) aren't being highlighted here because they are a systemic problem across the NBA. Referees have already proven they get it right far more often than they get it wrong. But it does represent an improvement area that referees can consider moving forward.
 
 ### Impact by National TV Network
 

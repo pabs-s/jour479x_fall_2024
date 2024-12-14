@@ -591,6 +591,127 @@ cat("Percentage of IC + INC calls out of total number of calls in two-point game
 
 ```
 
+
+Question 6: Who are the teams that have been either the beneficiaries or victims of incorrect officiating decisions?
+
+```{r}
+
+teams <- c("Celtics", "Nets", "Knicks", "76ers", "Raptors", 
+           "Bulls", "Cavaliers", "Pistons", "Pacers", "Bucks", 
+           "Hawks", "Hornets", "Heat", "Magic", "Wizards", 
+           "Nuggets", "Timberwolves", "Thunder", "Trail Blazers", 
+           "Jazz", "Warriors", "Clippers", "Lakers", "Suns", 
+           "Kings", "Mavericks", "Rockets", "Grizzlies", 
+           "Pelicans", "Spurs")
+
+top_teams <- player_counts |>
+  filter(!is.na(player), player %in% teams) |>  
+  arrange(desc(total_count)) |>  
+  slice(1:15)  
+
+```
+
+Let's now use the same analysis to identify the most disadvantaged teams when it comes to incorrect calls. 
+
+```{r}
+
+teams <- c("Celtics", "Nets", "Knicks", "76ers", "Raptors", 
+           "Bulls", "Cavaliers", "Pistons", "Pacers", "Bucks", 
+           "Hawks", "Hornets", "Heat", "Magic", "Wizards", 
+           "Nuggets", "Timberwolves", "Thunder", "Trail Blazers", 
+           "Jazz", "Warriors", "Clippers", "Lakers", "Suns", 
+           "Kings", "Mavericks", "Rockets", "Grizzlies", 
+           "Pelicans", "Spurs")
+
+top_teams <- player_counts |>
+  filter(!is.na(player), player %in% teams) |>  
+  arrange(desc(total_count)) |>  
+  slice(1:15)  
+
+ggplot(top_teams, aes(x = dis_count, xend = com_count, y = reorder(player, total_count))) +
+  geom_dumbbell(
+    colour = "grey", 
+    size = 2,         
+    dot_guide = TRUE, 
+    dot_guide_size = 0.5) +
+  geom_point(aes(x = dis_count), color = "blue", size = 3) +  
+  geom_point(aes(x = com_count), color = "red", size = 3) +   
+  labs(
+    title = "Top 15 Teams: Disadvantaged vs. Committing Counts",
+    subtitle = "Involvement in incorrect calls and no calls in NBA L2M report.",
+    x = "Number of Plays",
+    y = "Player",
+    caption = "Blue = Disadvantaged, Red = Committing | Data: atlhawksfanatic (GitHub) | By Pablo Suarez") +
+  theme_minimal()
+
+```
+It's deja vu for Jokic and his Nuggets. After following the same process to identify the top 15 teams and their involvement in incorrect calls and no calls, the Denver Nuggets lead the league with 53 disadvantaged calls. 
+
+It's also interesting that the Memphis Grizzlies lead all teams with five committing calls. That's possibly because there are many more possibilities for a call to be disadvantageous for a team rather than a team collectively commit some sort of offense.  
+
+For context, the graphic above is strictly for calls that are attributed directly to the team in the reports. Getting an even clearer picture of the frequency for a team's advantageous or disadvantageous calls requires totaling all instances of referenced players. For what it's worth. I think it's possible to figure out moving forward, as the "comments" column in the dataframe contains abbreviations for referenced players. Here's an example involving Jokic himself, "Jokic (DEN) establishes himself in a screening position..." I would filter the column for those team abbreviations and then group those rows based on the committing vs disadvantaged result.
+
+Okay, tangent over, now back to the Nuggets. Here is a distribution of those calls involving the team.
+
+```{r}
+
+nuggets <- l2m |> filter(disadvantaged == "Nuggets" | committing == "Nuggets")
+nuggets_inc_calls <- nuggets |> filter(decision %in% c("INC", "IC")) 
+
+nuggets_count <- nuggets_inc_calls |>
+  group_by(call_type, decision) |>
+  summarise(count = n(), .groups = "drop") |>
+  arrange(desc(count))
+
+nuggs1 <- ggplot(nuggets_count, aes(x = call_type, y = count, fill = decision)) +
+  geom_bar(stat = "identity") +
+  scale_fill_manual(
+    values = c("INC" = "blue", "IC" = "red")) +
+  labs(
+    title = "Nuggets Suffer from Uncalled Opponent Travels",
+    x = "Call Type",
+    y = "Count",
+    fill = "Decision",
+    caption = "Data: atlhawksfanatic (GitHub) | By Pablo Suarez") +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    plot.margin = margin(10, 10, 10, 30))
+
+
+```
+
+
+```{r}
+
+nuggs_call_summary <- nuggets_inc_calls |>
+  filter(committing == "Nuggets" | disadvantaged == "Nuggets") |> 
+  mutate(role = case_when(
+    committing == "Nuggets" ~ "Committing",
+    disadvantaged == "Nuggets" ~ "Disadvantaged")) |> 
+  group_by(call_type, role) |> 
+  summarise(count = n()) |>
+  arrange(desc(count))
+
+nuggs2 <- ggplot(nuggs_call_summary, aes(x = call_type, y = count, fill = role)) +
+  geom_bar(stat = "identity") +
+  scale_fill_manual(
+    values = c("Disadvantaged" = "blue", "Committing" = "red")) +
+  labs(
+    x = "Call Type",
+    fill = "Role") +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1))
+
+plot_grid(nuggs1, nuggs2)
+
+
+```
+
+
+
+
 ----------------
 
 
