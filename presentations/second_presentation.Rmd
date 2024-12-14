@@ -42,10 +42,14 @@ incorrect_calls <- l2m |>
   summarise(count = n()) |>
   arrange(desc(count))
 
-sum(incorrect_calls$count, na.rm = TRUE) #5912
+tot_inc <- sum(incorrect_calls$count, na.rm = TRUE) #5912
 #83,987
 
-(5912/83987) * 100 
+acc_avg <- (5912/83987) * 100 
+
+
+cat("Average accuracy of NBA referees in final two-minutes:", acc_avg, "%\n")
+
 
 ```
 
